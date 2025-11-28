@@ -12,26 +12,54 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-        .header { background: #4f46e5; color: white; padding: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 40; }
+        :root {
+            --color-bg: #f3f4f6;
+            --color-surface: white;
+            --color-surface-subtle: #f9fafb;
+            --color-text-primary: #1f2937;
+            --color-text-secondary: #6b7280;
+            --color-text-accent: #4f46e5;
+            --color-accent: #4f46e5;
+            --color-accent-hover: #4338ca;
+            --color-accent-text: white;
+            --color-border: #d1d5db;
+            --color-shadow: rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode {
+            --color-bg: #111827;
+            --color-surface: #1f2937;
+            --color-surface-subtle: #1f2937;
+            --color-text-primary: #f9fafb;
+            --color-text-secondary: #9ca3af;
+            --color-text-accent: #a5b4fc;
+            --color-accent: #6366f1;
+            --color-accent-hover: #4f46e5;
+            --color-accent-text: white;
+            --color-border: #374151;
+            --color-shadow: rgba(0,0,0,0.3);
+        }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: var(--color-bg); color: var(--color-text-primary); transition: background-color 0.3s, color 0.3s; }
+        .header { background: var(--color-accent); color: var(--color-accent-text); padding: 1rem; box-shadow: 0 4px 6px var(--color-shadow); position: sticky; top: 0; z-index: 40; }
         .header-container { max-width: 80rem; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-        .header-title { font-size: 1.875rem; font-weight: bold; margin: 0; }
-        .header-subtitle { font-size: 0.875rem; color: #c7d2fe; margin: 0; }
+        .header-title { font-size: 1.875rem; font-weight: bold; margin: 0; color: var(--color-accent-text); }
+        .header-subtitle { font-size: 0.875rem; color: var(--color-accent-text); opacity: 0.8; margin: 0; }
         .header-user-info { text-align: right; }
         .header-user-text { font-size: 0.875rem; margin: 0; }
-        .header-button { margin-top: 0.5rem; background: #6366f1; color: white; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 600; border: none; cursor: pointer; transition: background 0.2s; }
-        .header-button:hover { background: #4338ca; }
+        .header-button { margin-top: 0.5rem; background: var(--color-accent-hover); color: var(--color-accent-text); padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 600; border: none; cursor: pointer; transition: background 0.2s; }
+        .header-button:hover { background: #3730a3; }
 
-        .card { background: white; padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .btn-primary { background: #4f46e5; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; border: none; cursor: pointer; transition: all 0.2s; }
-        .btn-primary:hover { background: #4338ca; }
+        .card { background: var(--color-surface); color: var(--color-text-primary); padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 1px 3px var(--color-shadow); transition: background-color 0.3s, color 0.3s; }
+        .btn-primary { background: var(--color-accent); color: var(--color-accent-text); padding: 0.5rem 1rem; border-radius: 0.5rem; border: none; cursor: pointer; transition: all 0.2s; }
+        .btn-primary:hover { background: var(--color-accent-hover); }
         .btn-success { background: #16a34a; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; border: none; cursor: pointer; }
         .btn-success:hover { background: #15803d; }
         .btn-danger { background: #dc2626; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; border: none; cursor: pointer; }
         .btn-danger:hover { background: #b91c1c; }
-        .tab-active { background: #4f46e5; color: white; }
-        .tab-inactive { background: #e5e7eb; color: #374151; }
-        .form-label { display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.25rem; }
+        .tab-active { background: var(--color-accent); color: var(--color-accent-text); }
+        .tab-inactive { background: var(--color-surface); color: var(--color-text-secondary); }
+        .form-label { display: block; font-size: 0.875rem; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 0.25rem; }
         .password-container { position: relative; display: flex; align-items: center; }
     </style>
     <!-- Estilos refactorizados para mejor organización -->
@@ -43,7 +71,7 @@
             margin-bottom: 1.5rem;
         }
         .summary-card-title {
-            font-size: 0.875rem; color: #6b7280; font-weight: 600; margin: 0;
+            font-size: 0.875rem; color: var(--color-text-secondary); font-weight: 600; margin: 0;
         }
         .summary-card-value {
             font-size: 2.25rem; font-weight: bold; color: #16a34a; margin: 0.5rem 0 0 0;
@@ -74,7 +102,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100">
+<body>
 
 <!-- HEADER -->
 <header class="header">
@@ -84,8 +112,11 @@
             <p id="roleDisplay" class="header-subtitle">Cargando...</p>
         </div>
         <div class="header-user-info">
-            <p id="userDisplay" class="header-user-text">Usuario: -</p>
-            <button id="logoutButton" onclick="handleLogout()" class="header-button" style="display: none;">Cerrar Sesión</button>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <p id="userDisplay" class="header-user-text" style="margin: 0;">Usuario: -</p>
+                <button id="darkModeToggle" onclick="toggleDarkMode()" title="Cambiar modo" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0.25rem;">🌙</button>
+            </div>
+            <button id="logoutButton" onclick="handleLogout()" class="header-button" style="display: none; width: 100%;">Cerrar Sesión</button>
         </div>
     </div>
 </header>
@@ -94,7 +125,7 @@
 <main style="max-width: 80rem; margin: 0 auto; padding: 1.5rem;">
     <!-- ADMIN VIEW -->
     <div id="adminView" style="display: none;">
-        <h2 style="font-size: 1.875rem; font-weight: bold; color: #1e1b4b; margin-bottom: 1.5rem;">Panel de Administración</h2>
+        <h2 style="font-size: 1.875rem; font-weight: bold; color: var(--color-text-primary); margin-bottom: 1.5rem;">Panel de Administración</h2>
         
         <div style="margin-bottom: 1.5rem; display: flex; gap: 0.5rem; border-bottom: 1px solid #e5e7eb; overflow-x: auto; padding-bottom: 0;">
             <button onclick="switchTab('resumen')" class="adminTab tab-active" data-tab="resumen" style="padding: 0.75rem; border-radius: 0.5rem 0.5rem 0 0; font-weight: 600; transition: background 0.2s; border: none; cursor: pointer;">📊 Resumen</button>
@@ -110,26 +141,26 @@
         <!-- RUTAS TAB -->
         <div id="tab-rutas" class="tab-content" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
             <div class="card">
-                <h3 style="font-size: 1.25rem; font-weight: bold; color: #4338ca; margin-bottom: 1rem;">📍 Crear Nueva Ruta</h3>
+                <h3 style="font-size: 1.25rem; font-weight: bold; color: var(--color-text-accent); margin-bottom: 1rem;">📍 Crear Nueva Ruta</h3>
                 <div style="margin-bottom: 0.5rem;">
-                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">Preventista</label>
-                    <select id="routePreventistaSelect" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;"></select>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 0.5rem;">Preventista</label>
+                    <select id="routePreventistaSelect" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);"></select>
                 </div>
                 <div style="margin-bottom: 1rem;">
-                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">Fecha de Visita</label>
-                    <input type="date" id="routeVisitDate" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
+                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 0.5rem;">Fecha de Visita</label>
+                    <input type="date" id="routeVisitDate" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
                 </div>
                 <button onclick="createVisitRoute()" class="btn-success" style="width: 100%; font-size: 0.875rem;">Asignar Visitas</button>
             </div>
             
             <div class="card" style="grid-column: span 2;">
                 <h3 style="font-size: 1.25rem; font-weight: bold; color: #b45309; margin-bottom: 1rem;">👥 Seleccionar Clientes para Visitar</h3>
-                <input type="text" id="routeClientSearch" onkeyup="filterClientsForRoute()" placeholder="🔍 Buscar cliente..." style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem;">
+                <input type="text" id="routeClientSearch" onkeyup="filterClientsForRoute()" placeholder="🔍 Buscar cliente..." style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
                 <div id="routeClientsList" style="max-height: 384px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;"></div>
             </div>
             
             <div class="card">
-                <h3 style="font-size: 1.25rem; font-weight: bold; color: #1e40af; margin-bottom: 1rem;">Visitas Seleccionadas</h3>
+                <h3 style="font-size: 1.25rem; font-weight: bold; color: var(--color-text-accent); margin-bottom: 1rem;">Visitas Seleccionadas</h3>
                 <div id="selectedVisitsList" style="max-height: 384px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;">Ninguna</div>
             </div>
             <div class="card" style="grid-column: 1 / -1;">
@@ -142,12 +173,12 @@
         <div id="tab-productos" class="tab-content" style="display: none;">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                 <div class="card">
-                    <h3 style="font-size: 1.25rem; font-weight: bold; color: #4338ca; margin-bottom: 1rem;">Agregar Producto</h3>
-                    <input type="text" id="productName" placeholder="Nombre" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem;">
-                    <input type="number" id="productPrice" placeholder="Precio" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem;" step="0.01" min="0">
-                    <input type="number" id="productStock" placeholder="Stock inicial" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;" min="0">
+                    <h3 style="font-size: 1.25rem; font-weight: bold; color: var(--color-text-accent); margin-bottom: 1rem;">Agregar Producto</h3>
+                    <input type="text" id="productName" placeholder="Nombre" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
+                    <input type="number" id="productPrice" placeholder="Precio" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);" step="0.01" min="0">
+                    <input type="number" id="productStock" placeholder="Stock inicial" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);" min="0">
                     <label class="form-label" for="productCategory">Categoría</label>
-                    <select id="productCategory" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
+                    <select id="productCategory" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
                         <option value="">-- Seleccionar Subcategoría --</option>
                         <optgroup label="Alimentos Secos">
                             <option value="Pastas">Pastas</option>
@@ -178,12 +209,12 @@
                         <option value="Otros">Otros</option>
                     </select>
                     <label class="form-label" for="productImageFile">Imagen del producto (opcional)</label>
-                    <input type="file" id="productImageFile" accept="image/*" onchange="previewImage(this, 'addProductPreview')" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
+                    <input type="file" id="productImageFile" accept="image/*" onchange="previewImage(this, 'addProductPreview')" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
                     <img id="addProductPreview" src="https://via.placeholder.com/150" alt="Vista previa" style="width: 100px; height: 100px; object-fit: cover; border-radius: 0.375rem; margin-bottom: 0.75rem; display: none;">
                     <button onclick="addProduct()" class="btn-primary" style="width: 100%; font-size: 0.875rem;">Agregar Producto</button>
                 </div>
                 <div class="card" style="grid-column: span 2;">
-                    <h3 style="font-size: 1.25rem; font-weight: bold; color: #4338ca; margin-bottom: 1rem;">Catálogo</h3>
+                    <h3 style="font-size: 1.25rem; font-weight: bold; color: var(--color-text-accent); margin-bottom: 1rem;">Catálogo</h3>
                     <div id="productsList" style="max-height: 384px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;"></div>
                 </div>
             </div>
@@ -192,8 +223,8 @@
         <!-- CLIENTES TAB -->
         <div id="tab-clientes" class="tab-content" style="display: none;">
             <div class="card">
-                <h3 style="font-size: 1.25rem; font-weight: bold; color: #4338ca; margin-bottom: 1rem;">Lista de Clientes</h3>
-                <input type="text" id="clientSearch" onkeyup="filterClients()" placeholder="🔍 Buscar cliente por nombre o zona..." style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem;">
+                <h3 style="font-size: 1.25rem; font-weight: bold; color: var(--color-text-accent); margin-bottom: 1rem;">Lista de Clientes</h3>
+                <input type="text" id="clientSearch" onkeyup="filterClients()" placeholder="🔍 Buscar cliente por nombre o zona..." style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
                 <div id="clientsList" style="max-height: 384px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;"></div>
             </div>
         </div>
@@ -202,23 +233,23 @@
         <div id="tab-preventistas" class="tab-content" style="display: none;">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                 <div class="card">
-                    <h3 style="font-size: 1.25rem; font-weight: bold; color: #4338ca; margin-bottom: 1rem;">Crear Preventista</h3>
-                    <input type="text" id="preventistName" placeholder="Nombre" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem;">
-                    <input type="text" id="preventistDni" placeholder="DNI" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem;">
-                    <input type="text" id="preventistPhone" placeholder="Teléfono" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem;">
-                    <input type="text" id="preventistZone" placeholder="Zona (ej: ZONA-1)" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem;">
-                    <input type="email" id="preventistEmail" placeholder="Email" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
+                    <h3 style="font-size: 1.25rem; font-weight: bold; color: var(--color-text-accent); margin-bottom: 1rem;">Crear Preventista</h3>
+                    <input type="text" id="preventistName" placeholder="Nombre" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
+                    <input type="text" id="preventistDni" placeholder="DNI" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
+                    <input type="text" id="preventistPhone" placeholder="Teléfono" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
+                    <input type="text" id="preventistZone" placeholder="Zona (ej: ZONA-1)" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
+                    <input type="email" id="preventistEmail" placeholder="Email" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
                     <div class="password-container" style="margin-bottom: 0.75rem;">
-                        <input type="password" id="preventistPassword" placeholder="Contraseña" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
-                        <button id="togglePasswordBtn" onclick="togglePasswordVisibility()" type="button" style="position: absolute; right: 0.5rem; background: none; border: none; cursor: pointer; color: #6b7280;">
+                        <input type="password" id="preventistPassword" placeholder="Contraseña" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
+                        <button id="togglePasswordBtn" onclick="togglePasswordVisibility()" type="button" style="position: absolute; right: 0.5rem; background: none; border: none; cursor: pointer; color: var(--color-text-secondary);">
                             👁️
                         </button>
                     </div>
-                    <p style="font-size: 0.75rem; color: #6b7280; margin-top: -0.5rem; margin-bottom: 0.75rem;">Mínimo 8 caracteres, una mayúscula, una minúscula y un número.</p>
+                    <p style="font-size: 0.75rem; color: var(--color-text-secondary); margin-top: -0.5rem; margin-bottom: 0.75rem;">Mínimo 8 caracteres, una mayúscula, una minúscula y un número.</p>
                     <button onclick="addPreventista()" class="btn-primary" style="width: 100%; font-size: 0.875rem;">Crear</button>
                 </div>
                 <div class="card" style="grid-column: span 2;">
-                    <h3 style="font-size: 1.25rem; font-weight: bold; color: #4338ca; margin-bottom: 1rem;">Preventistas</h3>
+                    <h3 style="font-size: 1.25rem; font-weight: bold; color: var(--color-text-accent); margin-bottom: 1rem;">Preventistas</h3>
                     <div id="preventistasList" style="max-height: 384px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;"></div>
                 </div>
             </div>
@@ -227,8 +258,8 @@
         <!-- CLIENTES SIN ASIGNAR TAB -->
         <div id="tab-clientes-sin-asignar" class="tab-content" style="display: none;">
             <div class="card">
-                <h3 style="font-size: 1.25rem; font-weight: bold; color: #4338ca; margin-bottom: 1rem;">Clientes Sin Asignar</h3>
-                <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">Aquí puedes ver los clientes que no están asignados a ningún preventista y reasignarlos.</p>
+                <h3 style="font-size: 1.25rem; font-weight: bold; color: var(--color-text-accent); margin-bottom: 1rem;">Clientes Sin Asignar</h3>
+                <p style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 1rem;">Aquí puedes ver los clientes que no están asignados a ningún preventista y reasignarlos.</p>
                 <div id="unassignedClientsList" style="max-height: 384px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;"></div>
             </div>
         </div>
@@ -236,7 +267,7 @@
         <!-- PEDIDOS TAB -->
         <div id="tab-pedidos" class="tab-content" style="display: none;">
             <div class="card">
-                <h3 style="font-size: 1.25rem; font-weight: bold; color: #4338ca; margin-bottom: 1rem;">Pedidos Recibidos</h3>
+                <h3 style="font-size: 1.25rem; font-weight: bold; color: var(--color-text-accent); margin-bottom: 1rem;">Pedidos Recibidos</h3>
                 <div id="ordersList" style="max-height: 500px; overflow-y: auto; font-size: 0.875rem; display: flex; flex-direction: column; gap: 0.75rem;"></div>
             </div>
         </div>
@@ -258,11 +289,11 @@
                 <div class="card">
                     <h3 style="font-size: 1.25rem; font-weight: bold; color: #b45309; margin-bottom: 1rem;">⚠️ Alertas de Bajo Stock</h3>
                     <div id="lowStockList" style="max-height: 384px; overflow-y: auto; font-size: 0.875rem;">
-                        <p style="color: #6b7280;">No hay productos con bajo stock.</p>
+                        <p style="color: var(--color-text-secondary);">No hay productos con bajo stock.</p>
                     </div>
                 </div>
                 <div class="card">
-                    <h3 style="font-size: 1.25rem; font-weight: bold; color: #1e40af; margin-bottom: 1rem;">📦 Inventario General</h3>
+                    <h3 style="font-size: 1.25rem; font-weight: bold; color: var(--color-text-accent); margin-bottom: 1rem;">📦 Inventario General</h3>
                     <div id="inventoryList" style="max-height: 384px; overflow-y: auto; font-size: 0.875rem;">
                         <!-- El inventario se cargará aquí -->
                     </div>
@@ -274,9 +305,9 @@
         <div id="tab-reportes" class="tab-content" style="display: none;">
             <div class="card" style="margin-bottom: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="font-size: 1.25rem; font-weight: bold; color: #4338ca; margin: 0;">Análisis de Ventas</h3>
+                    <h3 style="font-size: 1.25rem; font-weight: bold; color: var(--color-text-accent); margin: 0;">Análisis de Ventas</h3>
                     <div style="display: flex; align-items: center; gap: 1rem;">
-                        <select id="reportDateRange" onchange="loadReportsData()" style="padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
+                        <select id="reportDateRange" onchange="loadReportsData()" style="padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
                             <option value="7">Últimos 7 días</option>
                             <option value="30" selected>Últimos 30 días</option>
                             <option value="90">Últimos 90 días</option>
@@ -301,7 +332,7 @@
 
     <!-- PREVENTISTA VIEW -->
     <div id="preventistaView" style="display: none;">
-        <h2 style="font-size: 1.875rem; font-weight: bold; color: #1e40af; margin-bottom: 1.5rem;">Panel de Preventista</h2>
+        <h2 style="font-size: 1.875rem; font-weight: bold; color: var(--color-text-accent); margin-bottom: 1.5rem;">Panel de Preventista</h2>
         <div style="display: flex; gap: 0.5rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0;">
             <button onclick="switchTab('nuevo-pedido')" class="prevTab tab-active" data-tab="nuevo-pedido" style="padding: 0.75rem; border-radius: 0.5rem 0.5rem 0 0; font-weight: 600; border: none; cursor: pointer; background: #4f46e5; color: white;">📝 Nuevo Pedido</button>
             <button onclick="switchTab('mis-pedidos')" class="prevTab tab-inactive" data-tab="mis-pedidos" style="padding: 0.75rem; border-radius: 0.5rem 0.5rem 0 0; font-weight: 600; border: none; cursor: pointer; background: #e5e7eb; color: #374151;">📋 Mis Pedidos</button>
@@ -315,16 +346,16 @@
         <div id="tab-mis-clientes" class="tab-content" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
             <div class="card" style="grid-column: 1 / -1;">
                 <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">Mis Clientes</h3>
-                <input type="text" id="myClientSearch" onkeyup="filterMyClients()" placeholder="🔍 Buscar en mis clientes..." style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem;">
+                <input type="text" id="myClientSearch" onkeyup="filterMyClients()" placeholder="🔍 Buscar en mis clientes..." style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
                 <div id="myClientsList" style="max-height: 384px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; font-size: 0.875rem;"></div>
             </div>
             <div class="card" style="grid-column: span 2;">
                 <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">Crear Nuevo Cliente</h3>
-                <input type="text" id="newClientName" placeholder="Nombre del negocio" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem;">
-                <input type="text" id="newClientAddress" placeholder="Dirección (para referencia)" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem;">
-                <input type="tel" id="newClientPhone" placeholder="Teléfono" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
+                <input type="text" id="newClientName" placeholder="Nombre del negocio" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
+                <input type="text" id="newClientAddress" placeholder="Dirección (para referencia)" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
+                <input type="tel" id="newClientPhone" placeholder="Teléfono" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
-                    <input type="text" id="newClientAddressSearch" placeholder="Buscar dirección para el mapa..." style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
+                    <input type="text" id="newClientAddressSearch" placeholder="Buscar dirección para el mapa..." style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
                     <button onclick="searchAddress('newClientAddressSearch', newClientMap, newClientMarker)" class="btn-primary" style="padding: 0.5rem 0.75rem; font-size: 0.75rem;">Buscar</button>
                 </div>
                 <div id="newClientMap" style="width: 100%; height: 250px; border-radius: 0.5rem; background: #e5e7eb; margin-bottom: 0.75rem; z-index: 1;"></div>
@@ -373,16 +404,16 @@
                 <!-- Columna de Catálogo -->
                 <div class="card" style="grid-column: span 2;">
                     <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">1. Seleccionar Productos</h3>
-                    <input type="text" id="productSearch" onkeyup="filterProducts()" placeholder="🔍 Buscar producto..." style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem;">
+                    <input type="text" id="productSearch" onkeyup="filterProducts()" placeholder="🔍 Buscar producto..." style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
                     <div id="orderCatalogList" style="max-height: 400px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; font-size: 0.875rem;"></div>
                 </div>
                 <!-- Columna de Resumen de Pedido -->
                 <div class="card">
                     <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">2. Resumen del Pedido</h3>
                     <p id="editingOrderIndicator" style="font-size: 0.8rem; font-weight: bold; color: #b45309; background: #fffbeb; padding: 0.5rem; border-radius: 0.375rem; margin-bottom: 1rem; display: none;">✏️ Editando Pedido...</p>
-                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">Cliente</label>
-                    <select id="orderClientSelect" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem; margin-bottom: 1rem;"></select>
-                    <div id="orderSummaryList" style="max-height: 220px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 0.375rem; padding: 0.75rem; background: #f9fafb; margin-bottom: 1rem; font-size: 0.875rem;"><p style="color: #6b7280;">Agrega productos del catálogo.</p></div>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 0.5rem;">Cliente</label>
+                    <select id="orderClientSelect" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; font-size: 0.875rem; margin-bottom: 1rem; background-color: var(--color-surface); color: var(--color-text-primary);"></select>
+                    <div id="orderSummaryList" style="max-height: 220px; overflow-y: auto; border: 1px solid var(--color-border); border-radius: 0.375rem; padding: 0.75rem; background: var(--color-surface-subtle); margin-bottom: 1rem; font-size: 0.875rem;"><p style="color: var(--color-text-secondary);">Agrega productos del catálogo.</p></div>
                     <p style="font-size: 1.125rem; font-weight: bold; text-align: right; margin-bottom: 1rem;">Total: <span id="orderTotal">$0.00</span></p>
                     <button id="submitOrderBtn" onclick="submitOrder()" class="btn-success" style="width: 100%; font-size: 0.875rem;">✓ Finalizar Pedido</button>
                 </div>
@@ -395,7 +426,7 @@
         <div class="card" style="max-width: 32rem; width: 100%; margin: 0 1rem; max-height: 90vh; display: flex; flex-direction: column;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.75rem; margin-bottom: 1rem;">
                 <h2 id="clientProfileName" style="font-size: 1.5rem; font-weight: bold;">Perfil del Cliente</h2>
-                <button onclick="closeClientProfileModal()" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; color: #9ca3af;">&times;</button>
+                <button onclick="closeClientProfileModal()" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; color: var(--color-text-secondary);">&times;</button>
             </div>
             <div style="flex-grow: 1; overflow-y: auto; font-size: 0.875rem;">
                 <p id="clientProfileAddress" style="margin: 0 0 0.5rem 0;"></p>
@@ -415,14 +446,14 @@
         <div class="card" style="max-width: 36rem; width: 100%; margin: 0 1rem; max-height: 90vh; display: flex; flex-direction: column;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.75rem; margin-bottom: 1rem;">
                 <h2 style="font-size: 1.5rem; font-weight: bold;">Detalle del Pedido</h2>
-                <button onclick="closeBoletaModal()" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; color: #9ca3af;">&times;</button>
+                <button onclick="closeBoletaModal()" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; color: var(--color-text-secondary);">&times;</button>
             </div>
             <div id="boletaContent" style="flex-grow: 1; overflow-y: auto; font-size: 0.875rem;">
                 <!-- El contenido de la boleta se inyectará aquí -->
             </div>
             <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;" class="no-print">
                 <button onclick="printBoleta()" class="btn-success" style="width: 100%;">Imprimir</button>
-                <button onclick="closeBoletaModal()" class="btn-primary" style="width: 100%; background: #6b7280;">Cerrar</button>
+                <button onclick="closeBoletaModal()" class="btn-primary" style="width: 100%; background: var(--color-text-secondary);">Cerrar</button>
             </div>
         </div>
     </div>
@@ -433,13 +464,13 @@
             <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">Editar Producto</h2>
             <input type="hidden" id="editProductId">
             <label class="form-label" for="editProductName">Nombre</label>
-            <input type="text" id="editProductName" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
+            <input type="text" id="editProductName" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
             <label class="form-label" for="editProductPrice">Precio</label>
-            <input type="number" id="editProductPrice" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;" step="0.01" min="0">
+            <input type="number" id="editProductPrice" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);" step="0.01" min="0">
             <label class="form-label" for="editProductStock">Stock</label>
-            <input type="number" id="editProductStock" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;" min="0">
+            <input type="number" id="editProductStock" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);" min="0">
             <label class="form-label" for="editProductCategory">Categoría</label>
-            <select id="editProductCategory" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
+            <select id="editProductCategory" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
                 <option value="">-- Seleccionar Subcategoría --</option>
                 <optgroup label="Alimentos Secos">
                     <option value="Pastas">Pastas</option>
@@ -470,11 +501,11 @@
                 <option value="Otros">Otros</option>
             </select>
             <label class="form-label" for="editProductImageFile">Cambiar Imagen (opcional)</label>
-            <input type="file" id="editProductImageFile" accept="image/*" onchange="previewImage(this, 'editProductPreview')" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem;">
+            <input type="file" id="editProductImageFile" accept="image/*" onchange="previewImage(this, 'editProductPreview')" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
             <input type="hidden" id="editProductImageUrl"> <!-- Mantenemos este campo oculto para la URL actual -->
             <img id="editProductPreview" src="" alt="Vista previa" style="width: 100px; height: 100px; object-fit: cover; border-radius: 0.375rem; margin-bottom: 0.75rem; display: block;">
             <button onclick="updateProduct()" class="btn-success" style="width: 100%; font-size: 0.875rem; margin-bottom: 0.5rem;">Guardar Cambios</button>
-            <button onclick="closeEditProductModal()" class="btn-primary" style="width: 100%; background: #6b7280; font-size: 0.875rem;">Cancelar</button>
+            <button onclick="closeEditProductModal()" class="btn-primary" style="width: 100%; background: var(--color-text-secondary); font-size: 0.875rem;">Cancelar</button>
         </div>
     </div>
 
@@ -484,20 +515,20 @@
             <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">Editar Cliente</h2>
             <input type="hidden" id="editClientId">
             <label class="form-label" for="editClientName">Nombre del negocio</label>
-            <input type="text" id="editClientName" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
+            <input type="text" id="editClientName" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
             <label class="form-label" for="editClientAddress">Dirección</label>
-            <input type="text" id="editClientAddress" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
+            <input type="text" id="editClientAddress" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
             <label class="form-label" for="editClientPhone">Teléfono</label>
-            <input type="tel" id="editClientPhone" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
+            <input type="tel" id="editClientPhone" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
             <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
-                <input type="text" id="editClientAddressSearch" placeholder="Buscar nueva dirección..." style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
+                <input type="text" id="editClientAddressSearch" placeholder="Buscar nueva dirección..." style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
                 <button onclick="searchAddress('editClientAddressSearch', editClientMap, editClientMarker)" class="btn-primary" style="padding: 0.5rem 0.75rem; font-size: 0.75rem;">Buscar</button>
             </div>
             <div id="editClientMap" style="width: 100%; height: 250px; border-radius: 0.5rem; background: #e5e7eb; margin-bottom: 0.75rem; z-index: 1;"></div>
             <input type="hidden" id="editClientLat">
             <input type="hidden" id="editClientLng">
             <button onclick="updateClient()" class="btn-success" style="width: 100%; font-size: 0.875rem; margin-bottom: 0.5rem;">Guardar Cambios</button>
-            <button onclick="closeEditClientModal()" class="btn-primary" style="width: 100%; background: #6b7280; font-size: 0.875rem;">Cancelar</button>
+            <button onclick="closeEditClientModal()" class="btn-primary" style="width: 100%; background: var(--color-text-secondary); font-size: 0.875rem;">Cancelar</button>
         </div>
     </div>
 
@@ -507,16 +538,16 @@
             <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">Editar Preventista</h2>
             <input type="hidden" id="editPreventistaId">
             <label class="form-label" for="editPreventistName">Nombre</label>
-            <input type="text" id="editPreventistName" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
+            <input type="text" id="editPreventistName" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
             <label class="form-label" for="editPreventistDni">DNI</label>
-            <input type="text" id="editPreventistDni" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
+            <input type="text" id="editPreventistDni" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
             <label class="form-label" for="editPreventistPhone">Teléfono</label>
-            <input type="text" id="editPreventistPhone" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
+            <input type="text" id="editPreventistPhone" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
             <label class="form-label" for="editPreventistZone">Zona</label>
-            <input type="text" id="editPreventistZone" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem;">
-            <p id="editPreventistEmail" style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem; background: #f3f4f6; padding: 0.5rem; border-radius: 0.375rem;"></p>
+            <input type="text" id="editPreventistZone" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
+            <p id="editPreventistEmail" style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 1rem; background: var(--color-bg); padding: 0.5rem; border-radius: 0.375rem;"></p>
             <button onclick="updatePreventista()" class="btn-success" style="width: 100%; font-size: 0.875rem; margin-bottom: 0.5rem;">Guardar Cambios</button>
-            <button onclick="closeEditPreventistaModal()" class="btn-primary" style="width: 100%; background: #6b7280; font-size: 0.875rem;">Cancelar</button>
+            <button onclick="closeEditPreventistaModal()" class="btn-primary" style="width: 100%; background: var(--color-text-secondary); font-size: 0.875rem;">Cancelar</button>
         </div>
     </div>
 
@@ -524,14 +555,14 @@
     <div id="loginModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 50;">
         <div class="card" style="max-width: 28rem; width: 100%; margin: 0 1rem;">
             <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">Ingresar al Sistema</h2>
-            <input type="text" id="loginEmail" placeholder="Email" oninput="checkAdminEmail()" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
-            <input type="password" id="loginPassword" placeholder="Contraseña" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
-            <select id="loginRole" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem;">
+            <input type="text" id="loginEmail" placeholder="Email" oninput="checkAdminEmail()" style="width: 100%; padding: 0.75rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
+            <input type="password" id="loginPassword" placeholder="Contraseña" style="width: 100%; padding: 0.75rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
+            <select id="loginRole" style="width: 100%; padding: 0.75rem; border: 1px solid var(--color-border); border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem; background-color: var(--color-surface); color: var(--color-text-primary);">
                 <option value="admin" id="adminRoleOption">Administrador</option>
                 <option value="preventista">Preventista</option>
             </select>
             <button onclick="handleLogin()" class="btn-primary" style="width: 100%; font-size: 0.875rem;">Ingresar</button>
-            <p id="loginDemoText" style="font-size: 0.75rem; color: #6b7280; margin-top: 0.75rem; text-align: center; display: none;">Demo: email y contraseña pueden ser cualquiera</p>
+            <p id="loginDemoText" style="font-size: 0.75rem; color: var(--color-text-secondary); margin-top: 0.75rem; text-align: center; display: none;">Demo: email y contraseña pueden ser cualquiera</p>
         </div>
     </div>
 
@@ -618,16 +649,16 @@
         document.querySelectorAll('.adminTab, .prevTab').forEach(btn => {
             btn.classList.remove('tab-active');
             btn.classList.add('tab-inactive');
-            btn.style.background = '#e5e7eb';
-            btn.style.color = '#374151';
+            btn.style.background = 'var(--color-surface)';
+            btn.style.color = 'var(--color-text-secondary)';
         });
         
         const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
         if (activeBtn) {
             activeBtn.classList.remove('tab-inactive');
             activeBtn.classList.add('tab-active');
-            activeBtn.style.background = '#4f46e5';
-            activeBtn.style.color = 'white';
+            activeBtn.style.background = 'var(--color-accent)';
+            activeBtn.style.color = 'var(--color-accent-text)';
         }
 
         if (tabName === 'nuevo-pedido') {
@@ -667,6 +698,21 @@
         } else {
             passwordInput.type = 'password';
             toggleBtn.textContent = '👁️';
+        }
+    }
+
+    function toggleDarkMode() {
+        const body = document.body;
+        const toggleBtn = document.getElementById('darkModeToggle');
+        
+        body.classList.toggle('dark-mode');
+
+        if (body.classList.contains('dark-mode')) {
+            localStorage.setItem('darkMode', 'enabled');
+            toggleBtn.textContent = '☀️';
+        } else {
+            localStorage.setItem('darkMode', 'disabled');
+            toggleBtn.textContent = '🌙';
         }
     }
 
@@ -1175,6 +1221,8 @@
                 <div style="text-align: center; margin-bottom: 1.5rem;">
                     <h3 style="font-size: 1.25rem; font-weight: bold; color: #1e1b4b; margin: 0;">DISTRIBUIDORA URBANS</h3>
                     <p style="color: #6b7280; margin: 0.25rem 0 0 0;">Comprobante de Pedido</p>
+                    <h3 style="font-size: 1.25rem; font-weight: bold; color: var(--color-text-primary); margin: 0;">DISTRIBUIDORA URBANS</h3>
+                    <p style="color: var(--color-text-secondary); margin: 0.25rem 0 0 0;">Comprobante de Pedido</p>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px dashed #d1d5db;">
@@ -1182,6 +1230,7 @@
                         <p style="font-weight: 600; margin: 0 0 0.25rem 0;">Facturar a:</p>
                         <p style="margin: 0; font-weight: 500;">${order.clientes?.nombre || 'Cliente no especificado'}</p>
                         <p style="color: #6b7280; margin: 0.25rem 0 0 0; font-size: 0.8rem;">${order.clientes?.direccion || 'Sin dirección'}</p>
+                        <p style="color: var(--color-text-secondary); margin: 0.25rem 0 0 0; font-size: 0.8rem;">${order.clientes?.direccion || 'Sin dirección'}</p>
                     </div>
                     <div style="text-align: right;">
                         <p style="margin: 0 0 0.25rem 0;"><strong>Pedido N°:</strong> ${order.id}</p>
@@ -1192,6 +1241,7 @@
 
                 <table style="width: 100%; border-collapse: collapse;">
                     <thead style="text-align: left; color: #374151;">
+                    <thead style="text-align: left; color: var(--color-text-secondary);">
                         <tr>
                             <th style="padding: 0 0.75rem 0.75rem 0.75rem; width: 15%; text-align: center; font-weight: 600;">Cant.</th>
                             <th style="padding: 0 0.75rem 0.75rem 0.75rem; font-weight: 600;">Descripción</th>
@@ -1205,6 +1255,7 @@
                 <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #1e1b4b;">
                     <div style="display: flex; justify-content: flex-end; align-items: center;">
                         <span style="font-size: 1.125rem; font-weight: 600; color: #374151; margin-right: 1rem;">TOTAL:</span>
+                        <span style="font-size: 1.125rem; font-weight: 600; color: var(--color-text-primary); margin-right: 1rem;">TOTAL:</span>
                         <span style="font-size: 1.5rem; font-weight: bold; color: #16a34a;">$${formatCurrency(order.total)}</span>
                     </div>
                 </div>
@@ -1292,14 +1343,14 @@
             const productsList = document.getElementById('productsList');
             productsList.innerHTML = (productos || []).map(p => `
                 <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: #f9fafb;">
-                    <img src="${p.imagen_url || 'https://via.placeholder.com/64'}" alt="${p.nombre}" style="width: 64px; height: 64px; object-fit: cover; border-radius: 0.375rem; background: #e5e7eb;">
+                    <img src="${p.imagen_url || 'https://via.placeholder.com/64'}" alt="${p.nombre}" style="width: 64px; height: 64px; object-fit: cover; border-radius: 0.375rem; background: var(--color-bg);">
                     <div style="flex-grow: 1;">
                         <p style="font-weight: 600; margin: 0;">${p.nombre}</p>
                         <p style="color: #16a34a; font-weight: bold; margin: 0.25rem 0 0 0;">$${formatCurrency(p.precio)}</p>
-                        <p style="font-size: 0.75rem; color: #6b7280; margin: 0.25rem 0 0 0;">Categoría: ${p.categoria || 'Sin categoría'}</p>
+                        <p style="font-size: 0.75rem; color: var(--color-text-secondary); margin: 0.25rem 0 0 0;">Categoría: ${p.categoria || 'Sin categoría'}</p>
                     </div>
                     <div>
-                        <p style="font-size: 0.75rem; color: #6b7280; margin: 0; text-align: right;">Stock</p>
+                        <p style="font-size: 0.75rem; color: var(--color-text-secondary); margin: 0; text-align: right;">Stock</p>
                         <p style="font-weight: bold; font-size: 1.125rem; margin: 0; text-align: right; color: ${p.stock <= 10 ? '#b91c1c' : '#1e40af'};">${p.stock || 0}</p>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0;">
@@ -1307,7 +1358,7 @@
                         <button onclick="deleteProduct(${p.id}, '${p.nombre.replace(/'/g, "\\'")}')" class="btn-danger" style="padding: 0.5rem 0.75rem; font-size: 0.75rem;">Eliminar</button>
                     </div>
                 </div>
-            `).join('') || '<p style="color: #6b7280;">Sin productos</p>';
+            `).join('') || '<p style="color: var(--color-text-secondary);">Sin productos</p>';
 
             // Cargar clientes
             const { data: clientes } = await supabase.from('clientes').select('*');
@@ -1324,17 +1375,17 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: #f9fafb;">
                     <div style="flex-grow: 1;">
                         <p style="font-weight: 600; margin: 0;">${c.nombre}</p>
-                        <p style="color: #6b7280; margin: 0.25rem 0 0 0; font-size: 0.8rem;">${c.direccion}</p>
+                        <p style="color: var(--color-text-secondary); margin: 0.25rem 0 0 0; font-size: 0.8rem;">${c.direccion}</p>
                     </div>
                     <div style="display: flex; gap: 0.5rem; align-items: center; flex-shrink: 0;">
-                        <select id="reassign-select-${c.id}" style="padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.75rem;">
+                        <select id="reassign-select-${c.id}" style="padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; font-size: 0.75rem; background-color: var(--color-surface); color: var(--color-text-primary);">
                             <option value="">-- Reasignar a --</option>
                             ${preventistaOptions}
                         </select>
                         <button onclick="reassignClient(${c.id})" class="btn-success" style="padding: 0.5rem 0.75rem; font-size: 0.75rem;">Reasignar</button>
                     </div>
                 </div>
-            `).join('') || '<p style="color: #6b7280;">No hay clientes sin asignar.</p>';
+            `).join('') || '<p style="color: var(--color-text-secondary);">No hay clientes sin asignar.</p>';
 
             // Cargar preventistas
             const { data: preventistas } = await supabase.from('preventistas').select('*');
@@ -1344,16 +1395,16 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: #f9fafb;">
                     <div>
                         <p style="font-weight: 600; margin: 0;">${p.nombre}</p>
-                        <p style="color: #4f46e5; font-weight: bold; margin: 0.25rem 0 0 0;">Zona: ${p.zona || 'N/A'}</p>
-                        <p style="color: #6b7280; font-size: 0.8rem; margin: 0.25rem 0 0 0;">DNI: ${p.dni || 'N/A'} | Tel: ${p.telefono || 'N/A'}</p>
-                        <p style="color: #6b7280; font-size: 0.8rem; margin: 0.25rem 0 0 0;">${p.email || 'N/A'}</p>
+                        <p style="color: var(--color-text-accent); font-weight: bold; margin: 0.25rem 0 0 0;">Zona: ${p.zona || 'N/A'}</p>
+                        <p style="color: var(--color-text-secondary); font-size: 0.8rem; margin: 0.25rem 0 0 0;">DNI: ${p.dni || 'N/A'} | Tel: ${p.telefono || 'N/A'}</p>
+                        <p style="color: var(--color-text-secondary); font-size: 0.8rem; margin: 0.25rem 0 0 0;">${p.email || 'N/A'}</p>
                     </div>
                     <div>
                         <button onclick="showEditPreventistaModal(${p.id})" class="btn-primary" style="padding: 0.5rem 0.75rem; font-size: 0.75rem; margin-bottom: 0.5rem; width: 100%;">Editar</button>
                         <button onclick="deletePreventista(${p.id}, '${p.nombre.replace(/'/g, "\\'")}')" class="btn-danger" style="padding: 0.5rem 0.75rem; font-size: 0.75rem; width: 100%;">Eliminar</button>
                     </div>
                 </div>
-            `).join('') || '<p style="color: #6b7280;">Sin preventistas</p>';
+            `).join('') || '<p style="color: var(--color-text-secondary);">Sin preventistas</p>';
 
             // Actualizar select
             const select = document.getElementById('routePreventistaSelect');
@@ -1391,7 +1442,7 @@
                                 <p style="font-weight: 600; margin: 0;">Pedido #${o.id} - <span style="color: #4338ca;">${o.clientes?.nombre || 'Cliente no encontrado'}</span></p>
                                 <p style="font-weight: bold; margin: 0; color: ${statusColor}; font-size: 0.8rem;">${o.estado.toUpperCase()}</p>
                             </div>
-                            <p style="margin: 0.25rem 0 0 0; color: #6b7280;">Preventista: ${o.preventistas.nombre} | Zona: ${o.zona}</p>
+                            <p style="margin: 0.25rem 0 0 0; color: var(--color-text-secondary);">Preventista: ${o.preventistas.nombre} | Zona: ${o.zona}</p>
                             <p style="margin: 0.25rem 0 0 0; font-weight: 600;">Total: $${formatCurrency(o.total)}</p>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
@@ -1400,7 +1451,7 @@
                         </div>
                     </div>
                 `;
-            }).join('') || '<p style="color: #6b7280;">Sin pedidos</p>';
+            }).join('') || '<p style="color: var(--color-text-secondary);">Sin pedidos</p>';
 
             // Cargar datos del dashboard (Resumen)
             const LOW_STOCK_THRESHOLD = 10;
@@ -1428,11 +1479,12 @@
                 lowStockList.innerHTML = lowStockProducts.map(p => `
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; border-bottom: 1px solid #e5e7eb;">
                         <span>${p.nombre}</span>
+                        <span style="color: var(--color-text-primary);">${p.nombre}</span>
                         <span style="font-weight: bold; color: #b91c1c;">${p.stock}</span>
                     </div>
                 `).join('');
             } else {
-                lowStockList.innerHTML = '<p style="color: #6b7280;">No hay productos con bajo stock.</p>';
+                lowStockList.innerHTML = '<p style="color: var(--color-text-secondary);">No hay productos con bajo stock.</p>';
             }
 
             const inventoryList = document.getElementById('inventoryList');
@@ -1448,7 +1500,7 @@
                         ${(productos || []).map(p => `
                             <tr style="border-bottom: 1px solid #f3f4f6;">
                                 <td style="padding: 0.5rem;">${p.nombre}</td>
-                                <td style="padding: 0.5rem; text-align: right; font-weight: 600; color: ${p.stock <= LOW_STOCK_THRESHOLD ? '#b91c1c' : '#374151'};">
+                                <td style="padding: 0.5rem; text-align: right; font-weight: 600; color: ${p.stock <= LOW_STOCK_THRESHOLD ? '#b91c1c' : 'var(--color-text-primary)'};">
                                     ${p.stock || 0}
                                 </td>
                             </tr>
@@ -1510,15 +1562,15 @@
             <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: #f9fafb;">
                 <div style="flex-grow: 1;">
                     <p style="font-weight: 600; margin: 0;">${c.nombre}</p>
-                    <p style="color: #6b7280; margin: 0.25rem 0 0 0; font-size: 0.8rem;">${c.direccion} ${c.latitud ? '📍' : ''}</p>
-                    <p style="color: #4f46e5; font-weight: bold; margin: 0.25rem 0 0 0;">Zona: ${c.zona}</p>
+                    <p style="color: var(--color-text-secondary); margin: 0.25rem 0 0 0; font-size: 0.8rem;">${c.direccion} ${c.latitud ? '📍' : ''}</p>
+                    <p style="color: var(--color-text-accent); font-weight: bold; margin: 0.25rem 0 0 0;">Zona: ${c.zona}</p>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0;">
                     <button onclick="showEditClientModal(${c.id})" class="btn-primary" style="padding: 0.5rem 0.75rem; font-size: 0.75rem;">Editar</button>
                     <button onclick="deleteClient(${c.id}, '${c.nombre.replace(/'/g, "\\'")}')" class="btn-danger" style="padding: 0.5rem 0.75rem; font-size: 0.75rem;">Eliminar</button>
                 </div>
             </div>
-        `).join('') || '<p style="color: #6b7280;">Sin clientes</p>';
+        `).join('') || '<p style="color: var(--color-text-secondary);">Sin clientes</p>';
     }
 
     function filterClients() {
@@ -1533,11 +1585,11 @@
     function renderClientsForRoute(clients) {
         const clientsList = document.getElementById('routeClientsList');
         clientsList.innerHTML = (clients || []).map(c => `
-            <div id="route-client-${c.id}" onclick="toggleClientSelection(${c.id})" style="padding: 0.75rem; border: 2px solid #d1d5db; border-radius: 0.375rem; background: white; cursor: pointer; transition: all 0.2s;">
+            <div id="route-client-${c.id}" onclick="toggleClientSelection(${c.id})" style="padding: 0.75rem; border: 2px solid var(--color-border); border-radius: 0.375rem; background: var(--color-surface); cursor: pointer; transition: all 0.2s;">
                 <p style="font-weight: 600; margin: 0;">${c.nombre}</p>
-                <p style="margin: 0.25rem 0 0 0; color: #6b7280; font-size: 0.8rem;">${c.direccion} ${c.latitud ? '📍' : ''}</p>
+                <p style="margin: 0.25rem 0 0 0; color: var(--color-text-secondary); font-size: 0.8rem;">${c.direccion} ${c.latitud ? '📍' : ''}</p>
             </div>
-        `).join('') || '<p style="color: #6b7280;">No hay clientes para mostrar.</p>';
+        `).join('') || '<p style="color: var(--color-text-secondary);">No hay clientes para mostrar.</p>';
     }
 
     function filterClientsForRoute() {
@@ -1572,7 +1624,7 @@
 
         const tableContainer = document.getElementById('salesByPreventistaTable');
         if (sortedSales.length === 0) {
-            tableContainer.innerHTML = '<p style="color: #6b7280;">No hay datos de ventas en este período.</p>';
+            tableContainer.innerHTML = '<p style="color: var(--color-text-secondary);">No hay datos de ventas en este período.</p>';
             return;
         }
 
@@ -1603,7 +1655,7 @@
 
         const tableContainer = document.getElementById('topProductsTable');
         if (sortedProducts.length === 0) {
-            tableContainer.innerHTML = '<p style="color: #6b7280;">No hay datos de productos vendidos en este período.</p>';
+            tableContainer.innerHTML = '<p style="color: var(--color-text-secondary);">No hay datos de productos vendidos en este período.</p>';
             return;
         }
 
@@ -1612,7 +1664,7 @@
                 ${sortedProducts.map(([name, quantity], index) => `
                     <tr style="border-bottom: 1px solid #f3f4f6;">
                         <td style="padding: 0.75rem 0.5rem; font-weight: 500;">${index + 1}. ${name}</td>
-                        <td style="padding: 0.75rem 0.5rem; text-align: right; font-weight: bold; color: #4f46e5;">${quantity}</td>
+                        <td style="padding: 0.75rem 0.5rem; text-align: right; font-weight: bold; color: var(--color-text-accent);">${quantity}</td>
                     </tr>
                 `).join('')}
             </table>
@@ -1687,7 +1739,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.25rem 0;">
                         <div>
                             <p style="margin: 0; font-weight: 500;">${product.nombre}</p>
-                            <p style="margin: 0; color: #6b7280; font-size: 0.75rem;">${quantity} x $${formatCurrency(product.precio)}</p>
+                            <p style="margin: 0; color: var(--color-text-secondary); font-size: 0.75rem;">${quantity} x $${formatCurrency(product.precio)}</p>
                         </div>
                         <p style="margin: 0; font-weight: 600;">$${formatCurrency(subtotal)}</p>
                     </div>
@@ -1696,7 +1748,7 @@
         }
 
         if (summaryHTML === '') {
-            summaryHTML = '<p style="color: #6b7280;">Agrega productos del catálogo.</p>';
+            summaryHTML = '<p style="color: var(--color-text-secondary);">Agrega productos del catálogo.</p>';
         }
 
         summaryList.innerHTML = summaryHTML;
@@ -1850,7 +1902,7 @@
         const sortedCategories = Object.keys(groupedProducts).sort();
 
         if (sortedCategories.length === 0) {
-            orderCatalogList.innerHTML = '<p style="color: #6b7280;">No se encontraron productos.</p>';
+            orderCatalogList.innerHTML = '<p style="color: var(--color-text-secondary);">No se encontraron productos.</p>';
             return;
         }
 
@@ -1858,15 +1910,15 @@
             catalogHTML += `<h4 style="font-size: 1.125rem; font-weight: bold; color: #4338ca; margin-bottom: 1rem; grid-column: 1 / -1; border-bottom: 2px solid #eef2ff; padding-bottom: 0.5rem;">${category}</h4>`;
             catalogHTML += groupedProducts[category].map(p => `
                 <div class="product-card" style="border: 2px solid ${currentOrder[p.id] > 0 ? '#4f46e5' : '#d1d5db'}; border-radius: 0.375rem; background: white; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: flex; flex-direction: column; transition: border-color 0.2s;">
-                    <img src="${p.imagen_url || 'https://via.placeholder.com/150'}" alt="${p.nombre}" onclick="showImagePreview('${p.imagen_url || 'https://via.placeholder.com/150'}')" style="width: 100%; height: 120px; object-fit: cover; border-radius: 0.375rem 0.375rem 0 0; background: #e5e7eb; cursor: pointer;">
+                    <img src="${p.imagen_url || 'https://via.placeholder.com/150'}" alt="${p.nombre}" onclick="showImagePreview('${p.imagen_url || 'https://via.placeholder.com/150'}')" style="width: 100%; height: 120px; object-fit: cover; border-radius: 0.375rem 0.375rem 0 0; background: var(--color-bg); cursor: pointer;">
                     <div style="padding: 0.75rem; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
                         <p style="font-weight: 600; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.nombre}</p>
-                        <p style="color: #16a34a; font-weight: bold; margin: 0.25rem 0;">$${formatCurrency(p.precio)} <span style="color: #6b7280; font-weight: 500; font-size: 0.75rem;">(Stock: ${p.stock || 0})</span></p>
+                        <p style="color: #16a34a; font-weight: bold; margin: 0.25rem 0;">$${formatCurrency(p.precio)} <span style="color: var(--color-text-secondary); font-weight: 500; font-size: 0.75rem;">(Stock: ${p.stock || 0})</span></p>
                     </div>
                     <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 0.75rem 0.75rem; margin-top: 0.5rem;">
                         <button onclick="updateOrder(${p.id}, (parseInt(document.getElementById('qty-${p.id}').value) || 0) - 1)" style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; width: 32px; height: 32px; border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">-</button>
                         <input type="number" id="qty-${p.id}" min="0" value="${currentOrder[p.id] || 0}" onchange="updateOrder(${p.id}, this.value)" onfocus="this.select()"
-                               style="width: 50px; text-align: center; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-weight: bold; -moz-appearance: textfield;">
+                               style="width: 50px; text-align: center; border: 1px solid var(--color-border); border-radius: 0.375rem; font-size: 1rem; font-weight: bold; -moz-appearance: textfield; background-color: var(--color-surface); color: var(--color-text-primary);">
                         <button onclick="updateOrder(${p.id}, (parseInt(document.getElementById('qty-${p.id}').value) || 0) + 1)" style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; width: 32px; height: 32px; border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">+</button>
                     </div>
                 </div>
@@ -1981,7 +2033,7 @@
                     catalogoHTML += `<h4 style="font-size: 1.125rem; font-weight: bold; color: #4338ca; margin-bottom: 1rem; grid-column: 1 / -1; border-bottom: 2px solid #eef2ff; padding-bottom: 0.5rem;">${category}</h4>`;
                     catalogoHTML += groupedProducts[category].map(p => `
                         <div style="border: 1px solid #d1d5db; border-radius: 0.375rem; background: white; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                            <img src="${p.imagen_url || 'https://via.placeholder.com/150'}" alt="${p.nombre}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 0.375rem 0.375rem 0 0; background: #e5e7eb;">
+                            <img src="${p.imagen_url || 'https://via.placeholder.com/150'}" alt="${p.nombre}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 0.375rem 0.375rem 0 0; background: var(--color-bg);">
                             <div style="padding: 0.75rem;">
                                 <p style="font-weight: 600; margin: 0;">${p.nombre}</p>
                                 <p style="color: #16a34a; font-weight: bold; margin: 0.25rem 0 0 0;">$${formatCurrency(p.precio)}</p>
@@ -1990,7 +2042,7 @@
                     `).join('');
                 }
             } else {
-                catalogoHTML = '<p style="color: #6b7280;">Sin productos</p>';
+                catalogoHTML = '<p style="color: var(--color-text-secondary);">Sin productos</p>';
             }
             catalogoList.innerHTML = catalogoHTML;
 
@@ -2024,15 +2076,15 @@
                             <p style="font-weight: 600; margin: 0;">Pedido #${o.id} - ${o.clientes?.nombre || 'N/A'}</p>
                             <p style="font-weight: bold; margin: 0; color: ${o.estado === 'entregado' ? '#16a34a' : '#b45309'}; font-size: 0.8rem; white-space: nowrap;">${o.estado.toUpperCase()}</p>
                         </div>
-                        <p style="margin: 0.25rem 0 0 0; font-size: 0.8rem; color: #6b7280;">Fecha: ${new Date(o.created_at).toLocaleDateString()}</p>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 0.8rem; color: var(--color-text-secondary);">Fecha: ${new Date(o.created_at).toLocaleDateString()}</p>
                         <p style="margin: 0.25rem 0 0 0; font-weight: 600;">Total: $${formatCurrency(o.total)}</p>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0;">
                         <button onclick="editOrder(${o.id})" class="btn-primary" style="font-size: 0.75rem; padding: 0.5rem 0.75rem;" ${o.estado === 'entregado' ? 'disabled title="No se puede editar un pedido entregado"' : ''}>✏️ Editar</button>
-                        <button onclick='showOrderModal(loadedOrders.find(p => p.id === ${o.id}))' class="btn-primary" style="background: #6b7280; font-size: 0.75rem; padding: 0.5rem 0.75rem;">📄 Ver</button>
+                        <button onclick='showOrderModal(loadedOrders.find(p => p.id === ${o.id}))' class="btn-primary" style="background: var(--color-text-secondary); font-size: 0.75rem; padding: 0.5rem 0.75rem;">📄 Ver</button>
                     </div>
                 </div>
-            `).join('') || '<p style="color: #6b7280;">No has realizado pedidos.</p>';
+            `).join('') || '<p style="color: var(--color-text-secondary);">No has realizado pedidos.</p>';
 
             // Cargar mis clientes
             renderMyClients(allMyClients, misPedidos);
@@ -2107,15 +2159,15 @@
             <div style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: #f9fafb; display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
                 <div style="flex-grow: 1;">
                     <p style="font-weight: 600; margin: 0;">${c.nombre} ${c.latitud ? '📍' : ''}</p>
-                    <p style="font-size: 0.8rem; color: #6b7280; margin: 0.25rem 0 0 0;">${c.direccion}</p>
+                    <p style="font-size: 0.8rem; color: var(--color-text-secondary); margin: 0.25rem 0 0 0;">${c.direccion}</p>
                     <p style="font-size: 0.75rem; font-style: italic; color: #4338ca; margin: 0.5rem 0 0 0;">${lastOrderDisplay}</p>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0;">
                     <button onclick="takeOrderForClient(${c.id})" class="btn-primary" style="font-size: 0.75rem; padding: 0.5rem 0.75rem;">📝 Iniciar Pedido</button>
-                    <button onclick="showClientProfileModal(${c.id})" class="btn-primary" style="background: #6b7280; font-size: 0.75rem; padding: 0.5rem 0.75rem;">👤 Ver Perfil</button>
+                    <button onclick="showClientProfileModal(${c.id})" class="btn-primary" style="background: var(--color-text-secondary); font-size: 0.75rem; padding: 0.5rem 0.75rem;">👤 Ver Perfil</button>
                 </div>
             </div>
-        `}).join('') || '<p style="color: #6b7280;">No tienes clientes asignados.</p>';
+        `}).join('') || '<p style="color: var(--color-text-secondary);">No tienes clientes asignados.</p>';
     }
 
     function filterMyClients() {
@@ -2139,13 +2191,13 @@
         routeListEl.innerHTML = (visits || []).map(v => `
             <div style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: ${v.estado === 'visitado' ? '#dcfce7' : 'white'};">
                 <p style="font-weight: 600; margin: 0;">${v.clientes.nombre}</p>
-                <p style="font-size: 0.8rem; color: #6b7280; margin: 0.25rem 0 0.5rem 0;">${v.clientes.direccion}</p>
+                <p style="font-size: 0.8rem; color: var(--color-text-secondary); margin: 0.25rem 0 0.5rem 0;">${v.clientes.direccion}</p>
                 <div style="display: flex; gap: 0.5rem;">
                     <button onclick="takeOrderForClient(${v.cliente_id})" class="btn-primary" style="width: 100%; font-size: 0.75rem; padding: 0.5rem;">📝 Tomar Pedido</button>
                     ${v.estado !== 'visitado' ? `<button onclick="markVisitAsDone(${v.id})" class="btn-success" style="width: 100%; font-size: 0.75rem; padding: 0.5rem;">✓ Visita Realizada</button>` : ''}
                 </div>
             </div>
-        `).join('') || '<p style="color: #6b7280;">No tienes visitas asignadas para hoy.</p>';
+        `).join('') || '<p style="color: var(--color-text-secondary);">No tienes visitas asignadas para hoy.</p>';
 
         // Actualizar el mapa de la ruta del preventista
         updateMyRouteMap(visits);
@@ -2258,6 +2310,31 @@
                 const { data: profile } = await supabase.from('preventistas').select('zona').eq('user_id', currentUser.id).single();
                 currentZone = profile?.zona || null;
             }
+
+            // Aplicar modo oscuro si está guardado
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('darkModeToggle').textContent = '☀️';
+            } else {
+                document.getElementById('darkModeToggle').textContent = '🌙';
+            }
+            // Hacer visible el botón de modo oscuro solo después de iniciar sesión
+            document.getElementById('darkModeToggle').style.display = 'block';
+
+
+            // Suscripción a eventos en tiempo real (solo si es admin)
+            if (currentRole === 'admin') {
+                supabase.channel('pedidos')
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos' }, payload => {
+                        console.log('Nuevo pedido recibido:', payload.new);
+                        // Muestra una alerta no intrusiva
+                        showAlert(`¡Nuevo pedido #${payload.new.id} recibido! Recargando datos...`, 'success');
+                        // Recarga los datos del admin para que la lista de pedidos se actualice
+                        loadAdminData();
+                    })
+                    .subscribe();
+            }
+
         }
         updateUI();
     }

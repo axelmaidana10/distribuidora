@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>App Logística - Supabase</title>
+    <!-- Leaflet.js (Alternativa gratuita a Google Maps) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
@@ -27,6 +33,21 @@
         .tab-inactive { background: #e5e7eb; color: #374151; }
         .form-label { display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.25rem; }
         .password-container { position: relative; display: flex; align-items: center; }
+    </style>
+    <!-- Estilos refactorizados para mejor organización -->
+    <style>
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .summary-card-title {
+            font-size: 0.875rem; color: #6b7280; font-weight: 600; margin: 0;
+        }
+        .summary-card-value {
+            font-size: 2.25rem; font-weight: bold; color: #16a34a; margin: 0.5rem 0 0 0;
+        }
     </style>
     <style>
         @media print {
@@ -83,6 +104,7 @@
             <button onclick="switchTab('productos')" class="adminTab tab-inactive" data-tab="productos" style="padding: 0.75rem; border-radius: 0.5rem 0.5rem 0 0; font-weight: 600; transition: background 0.2s; border: none; cursor: pointer;">📦 Productos</button>
             <button onclick="switchTab('clientes')" class="adminTab tab-inactive" data-tab="clientes" style="padding: 0.75rem; border-radius: 0.5rem 0.5rem 0 0; font-weight: 600; transition: background 0.2s; border: none; cursor: pointer;">👥 Clientes</button>
             <button onclick="switchTab('preventistas')" class="adminTab tab-inactive" data-tab="preventistas" style="padding: 0.75rem; border-radius: 0.5rem 0.5rem 0 0; font-weight: 600; transition: background 0.2s; border: none; cursor: pointer;">🚗 Preventistas</button>
+            <button onclick="switchTab('reportes')" class="adminTab tab-inactive" data-tab="reportes" style="padding: 0.75rem; border-radius: 0.5rem 0.5rem 0 0; font-weight: 600; transition: background 0.2s; border: none; cursor: pointer;">📈 Reportes</button>
             <button onclick="switchTab('clientes-sin-asignar')" class="adminTab tab-inactive" data-tab="clientes-sin-asignar" style="padding: 0.75rem; border-radius: 0.5rem 0.5rem 0 0; font-weight: 600; transition: background 0.2s; border: none; cursor: pointer;">👤 Clientes Sin Asignar</button>
         </div>
 
@@ -90,25 +112,30 @@
         <div id="tab-rutas" class="tab-content" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
             <div class="card">
                 <h3 style="font-size: 1.25rem; font-weight: bold; color: #4338ca; margin-bottom: 1rem;">📍 Crear Nueva Ruta</h3>
-                <div style="margin-bottom: 1rem;">
+                <div style="margin-bottom: 0.5rem;">
                     <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">Preventista</label>
                     <select id="routePreventistaSelect" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;"></select>
                 </div>
                 <div style="margin-bottom: 1rem;">
-                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">Pedidos Seleccionados</label>
-                    <div id="selectedOrdersList" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: #f9fafb; max-height: 160px; overflow-y: auto; min-height: 80px; font-size: 0.875rem;">Ninguno</div>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">Fecha de Visita</label>
+                    <input type="date" id="routeVisitDate" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
                 </div>
-                <button onclick="createRoute()" class="btn-success" style="width: 100%; font-size: 0.875rem;">Asignar Ruta</button>
+                <button onclick="createVisitRoute()" class="btn-success" style="width: 100%; font-size: 0.875rem;">Asignar Visitas</button>
+            </div>
+            
+            <div class="card" style="grid-column: span 2;">
+                <h3 style="font-size: 1.25rem; font-weight: bold; color: #b45309; margin-bottom: 1rem;">👥 Seleccionar Clientes para Visitar</h3>
+                <input type="text" id="routeClientSearch" onkeyup="filterClientsForRoute()" placeholder="🔍 Buscar cliente..." style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem;">
+                <div id="routeClientsList" style="max-height: 384px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;"></div>
             </div>
             
             <div class="card">
-                <h3 style="font-size: 1.25rem; font-weight: bold; color: #b45309; margin-bottom: 1rem;">⏱️ Pedidos Pendientes</h3>
-                <div id="pendingOrdersList" style="max-height: 384px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;"></div>
+                <h3 style="font-size: 1.25rem; font-weight: bold; color: #1e40af; margin-bottom: 1rem;">Visitas Seleccionadas</h3>
+                <div id="selectedVisitsList" style="max-height: 384px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;">Ninguna</div>
             </div>
-            
-            <div class="card">
-                <h3 style="font-size: 1.25rem; font-weight: bold; color: #1e40af; margin-bottom: 1rem;">🚚 Rutas Asignadas</h3>
-                <div id="routesList" style="max-height: 384px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;"></div>
+            <div class="card" style="grid-column: 1 / -1;">
+                <h3 style="font-size: 1.25rem; font-weight: bold; color: #059669; margin-bottom: 1rem;">🗺️ Mapa de Ruta</h3>
+                <div id="routeMap" style="width: 100%; height: 400px; border-radius: 0.5rem; background: #e5e7eb;"></div>
             </div>
         </div>
 
@@ -120,8 +147,10 @@
                     <input type="text" id="productName" placeholder="Nombre" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem;">
                     <input type="number" id="productPrice" placeholder="Precio" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem;" step="0.01" min="0">
                     <input type="number" id="productStock" placeholder="Stock inicial" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem;" min="0">
-                    <input type="text" id="productImageUrl" placeholder="URL de la imagen (opcional)" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
-                    <button onclick="addProduct()" class="btn-primary" style="width: 100%; font-size: 0.875rem;">Subir Producto</button>
+                    <label class="form-label" for="productImageFile">Imagen del producto (opcional)</label>
+                    <input type="file" id="productImageFile" accept="image/*" onchange="previewImage(this, 'addProductPreview')" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
+                    <img id="addProductPreview" src="https://via.placeholder.com/150" alt="Vista previa" style="width: 100px; height: 100px; object-fit: cover; border-radius: 0.375rem; margin-bottom: 0.75rem; display: none;">
+                    <button onclick="addProduct()" class="btn-primary" style="width: 100%; font-size: 0.875rem;">Agregar Producto</button>
                 </div>
                 <div class="card" style="grid-column: span 2;">
                     <h3 style="font-size: 1.25rem; font-weight: bold; color: #4338ca; margin-bottom: 1rem;">Catálogo</h3>
@@ -184,14 +213,14 @@
 
         <!-- RESUMEN TAB -->
         <div id="tab-resumen" class="tab-content" style="display: block;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="summary-grid">
                 <div class="card">
-                    <h4 style="font-size: 0.875rem; color: #6b7280; font-weight: 600; margin: 0;">VENTA SEMANAL</h4>
-                    <p id="weeklySales" style="font-size: 2.25rem; font-weight: bold; color: #16a34a; margin: 0.5rem 0 0 0;">$0.00</p>
+                    <h4 class="summary-card-title">VENTA SEMANAL</h4>
+                    <p id="weeklySales" class="summary-card-value">$0.00</p>
                 </div>
                 <div class="card">
-                    <h4 style="font-size: 0.875rem; color: #6b7280; font-weight: 600; margin: 0;">VENTA MENSUAL</h4>
-                    <p id="monthlySales" style="font-size: 2.25rem; font-weight: bold; color: #16a34a; margin: 0.5rem 0 0 0;">$0.00</p>
+                    <h4 class="summary-card-title">VENTA MENSUAL</h4>
+                    <p id="monthlySales" class="summary-card-value">$0.00</p>
                 </div>
             </div>
 
@@ -210,6 +239,34 @@
                 </div>
             </div>
         </div>
+
+        <!-- REPORTES TAB -->
+        <div id="tab-reportes" class="tab-content" style="display: none;">
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="font-size: 1.25rem; font-weight: bold; color: #4338ca; margin: 0;">Análisis de Ventas</h3>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <select id="reportDateRange" onchange="loadReportsData()" style="padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
+                            <option value="7">Últimos 7 días</option>
+                            <option value="30" selected>Últimos 30 días</option>
+                            <option value="90">Últimos 90 días</option>
+                            <option value="365">Último año</option>
+                        </select>
+                        <button onclick="exportReportsToCSV()" class="btn-success" style="font-size: 0.875rem;">Exportar a CSV</button>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                    <div class="card">
+                        <h4 style="font-weight: bold; margin-bottom: 1rem;">Ranking de Ventas por Preventista</h4>
+                        <div id="salesByPreventistaTable" style="max-height: 400px; overflow-y: auto;"></div>
+                    </div>
+                    <div class="card">
+                        <h4 style="font-weight: bold; margin-bottom: 1rem;">Top 10 Productos Vendidos (Unidades)</h4>
+                        <div id="topProductsTable" style="max-height: 400px; overflow-y: auto;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- PREVENTISTA VIEW -->
@@ -219,6 +276,7 @@
             <button onclick="switchTab('nuevo-pedido')" class="prevTab tab-active" data-tab="nuevo-pedido" style="padding: 0.75rem; border-radius: 0.5rem 0.5rem 0 0; font-weight: 600; border: none; cursor: pointer; background: #4f46e5; color: white;">📝 Nuevo Pedido</button>
             <button onclick="switchTab('mis-pedidos')" class="prevTab tab-inactive" data-tab="mis-pedidos" style="padding: 0.75rem; border-radius: 0.5rem 0.5rem 0 0; font-weight: 600; border: none; cursor: pointer; background: #e5e7eb; color: #374151;">📋 Mis Pedidos</button>
             <button onclick="switchTab('mis-clientes')" class="prevTab tab-inactive" data-tab="mis-clientes" style="padding: 0.75rem; border-radius: 0.5rem 0.5rem 0 0; font-weight: 600; border: none; cursor: pointer; background: #e5e7eb; color: #374151;">👥 Mis Clientes</button>
+            <button onclick="switchTab('mi-ruta')" class="prevTab tab-inactive" data-tab="mi-ruta" style="padding: 0.75rem; border-radius: 0.5rem 0.5rem 0 0; font-weight: 600; border: none; cursor: pointer; background: #e5e7eb; color: #374151;">📍 Mi Ruta de Hoy</button>
             <button onclick="switchTab('catalogo')" class="prevTab tab-inactive" data-tab="catalogo" style="padding: 0.75rem; border-radius: 0.5rem 0.5rem 0 0; font-weight: 600; border: none; cursor: pointer; background: #e5e7eb; color: #374151;">📦 Catálogo Completo</button>
             <button onclick="switchTab('mi-perfil')" class="prevTab tab-inactive" data-tab="mi-perfil" style="padding: 0.75rem; border-radius: 0.5rem 0.5rem 0 0; font-weight: 600; border: none; cursor: pointer; background: #e5e7eb; color: #374151;">👤 Mi Perfil</button>
             
@@ -232,9 +290,27 @@
             <div class="card" style="grid-column: span 2;">
                 <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">Crear Nuevo Cliente</h3>
                 <input type="text" id="newClientName" placeholder="Nombre del negocio" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem;">
-                <input type="text" id="newClientAddress" placeholder="Dirección" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem;">
+                <input type="text" id="newClientAddress" placeholder="Dirección (para referencia)" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem;">
                 <input type="tel" id="newClientPhone" placeholder="Teléfono" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <input type="text" id="newClientAddressSearch" placeholder="Buscar dirección para el mapa..." style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
+                    <button onclick="searchAddress('newClientAddressSearch', newClientMap, newClientMarker)" class="btn-primary" style="padding: 0.5rem 0.75rem; font-size: 0.75rem;">Buscar</button>
+                </div>
+                <div id="newClientMap" style="width: 100%; height: 250px; border-radius: 0.5rem; background: #e5e7eb; margin-bottom: 0.75rem; z-index: 1;"></div>
+                <input type="hidden" id="newClientLat">
+                <input type="hidden" id="newClientLng">
                 <button onclick="createClient()" class="btn-success" style="width: 100%; font-size: 0.875rem;">Crear Cliente</button>
+            </div>
+        </div>
+
+        <!-- MI RUTA TAB (PREVENTISTA) -->
+        <div id="tab-mi-ruta" class="tab-content" style="display: none; margin-top: 1.5rem;">
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem;">
+                <div class="card">
+                    <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">Visitas de Hoy</h3>
+                    <div id="myRouteList" style="max-height: 450px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem;"></div>
+                </div>
+                <div class="card"><div id="myRouteMap" style="width: 100%; height: 500px; border-radius: 0.5rem; background: #e5e7eb;"></div></div>
             </div>
         </div>
 
@@ -282,6 +358,23 @@
         </div>
     </div>
 
+    <!-- CLIENT PROFILE MODAL (PREVENTISTA) -->
+    <div id="clientProfileModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 50;">
+        <div class="card" style="max-width: 32rem; width: 100%; margin: 0 1rem; max-height: 90vh; display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                <h2 id="clientProfileName" style="font-size: 1.5rem; font-weight: bold;">Perfil del Cliente</h2>
+                <button onclick="closeClientProfileModal()" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; color: #9ca3af;">&times;</button>
+            </div>
+            <div style="flex-grow: 1; overflow-y: auto; font-size: 0.875rem;">
+                <p id="clientProfileAddress" style="margin: 0 0 0.5rem 0;"></p>
+                <p id="clientProfilePhone" style="margin: 0 0 1rem 0;"></p>
+                <div id="clientProfileMap" style="width: 100%; height: 200px; border-radius: 0.5rem; background: #e5e7eb; margin-bottom: 1rem; z-index: 1;"></div>
+                <h4 style="font-weight: bold; margin-bottom: 0.5rem;">Historial de Pedidos</h4>
+                <div id="clientProfileOrders" style="max-height: 150px; overflow-y: auto;"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- BOLETA MODAL -->
     <div id="boletaModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 50;">
         <div class="card" style="max-width: 36rem; width: 100%; margin: 0 1rem; max-height: 90vh; display: flex; flex-direction: column;">
@@ -310,8 +403,10 @@
             <input type="number" id="editProductPrice" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;" step="0.01" min="0">
             <label class="form-label" for="editProductStock">Stock</label>
             <input type="number" id="editProductStock" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;" min="0">
-            <label class="form-label" for="editProductImageUrl">URL de la Imagen</label>
-            <input type="text" id="editProductImageUrl" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem;">
+            <label class="form-label" for="editProductImageFile">Cambiar Imagen (opcional)</label>
+            <input type="file" id="editProductImageFile" accept="image/*" onchange="previewImage(this, 'editProductPreview')" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem;">
+            <input type="hidden" id="editProductImageUrl"> <!-- Mantenemos este campo oculto para la URL actual -->
+            <img id="editProductPreview" src="" alt="Vista previa" style="width: 100px; height: 100px; object-fit: cover; border-radius: 0.375rem; margin-bottom: 0.75rem; display: block;">
             <button onclick="updateProduct()" class="btn-success" style="width: 100%; font-size: 0.875rem; margin-bottom: 0.5rem;">Guardar Cambios</button>
             <button onclick="closeEditProductModal()" class="btn-primary" style="width: 100%; background: #6b7280; font-size: 0.875rem;">Cancelar</button>
         </div>
@@ -328,8 +423,13 @@
             <input type="text" id="editClientAddress" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
             <label class="form-label" for="editClientPhone">Teléfono</label>
             <input type="tel" id="editClientPhone" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
-            <label class="form-label" for="editClientZone">Zona</label>
-            <input type="text" id="editClientZone" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem;">
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <input type="text" id="editClientAddressSearch" placeholder="Buscar nueva dirección..." style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
+                <button onclick="searchAddress('editClientAddressSearch', editClientMap, editClientMarker)" class="btn-primary" style="padding: 0.5rem 0.75rem; font-size: 0.75rem;">Buscar</button>
+            </div>
+            <div id="editClientMap" style="width: 100%; height: 250px; border-radius: 0.5rem; background: #e5e7eb; margin-bottom: 0.75rem; z-index: 1;"></div>
+            <input type="hidden" id="editClientLat">
+            <input type="hidden" id="editClientLng">
             <button onclick="updateClient()" class="btn-success" style="width: 100%; font-size: 0.875rem; margin-bottom: 0.5rem;">Guardar Cambios</button>
             <button onclick="closeEditClientModal()" class="btn-primary" style="width: 100%; background: #6b7280; font-size: 0.875rem;">Cancelar</button>
         </div>
@@ -394,6 +494,21 @@
     let allPreventistas = []; // Cache de preventistas para edición
     let allClients = []; // Cache de clientes para edición y búsqueda
     let allProducts = []; // Cache de productos para edición
+    let selectedOrdersForRoute = []; // Array de IDs de pedidos seleccionados para una ruta
+    let selectedClientsForVisit = []; // Array de IDs de clientes seleccionados para una visita
+    let routeMap = null; // Instancia del mapa de rutas
+    let newClientMap = null; // Instancia del mapa para crear cliente
+    let editClientMap = null; // Instancia del mapa para editar cliente
+    let newClientMarker = null; // Marcador para crear cliente
+    let editClientMarker = null; // Marcador para editar cliente
+    let myRouteMap = null; // Instancia del mapa de ruta del preventista
+    let clientProfileMap = null; // Instancia del mapa del perfil de cliente
+    // Instancias de los gráficos para poder destruirlos y recrearlos
+    let salesByPreventistaChartInstance = null;
+    let topProductsChartInstance = null;
+
+    // Registrar plugins de Chart.js globalmente
+    Chart.register(ChartDataLabels);
 
     // ====== FUNCIONES AUXILIARES ======
     function formatCurrency(value) {
@@ -451,6 +566,17 @@
         if (tabName === 'nuevo-pedido') {
             resetOrderForm();
         }
+        if (tabName === 'mis-clientes') {
+            // Inicializa el mapa para crear un nuevo cliente cuando se va a la pestaña
+            // Se usa un timeout para asegurar que el div del mapa sea visible
+            setTimeout(() => initMapForNewClient(), 100);
+        }
+        if (tabName === 'reportes') {
+            loadReportsData();
+        }
+        if (tabName === 'mi-ruta') {
+            loadMyRouteData();
+        }
     }
 
     async function handleLogout() {
@@ -500,8 +626,8 @@
         const name = document.getElementById('productName').value;
         const price = parseFloat(document.getElementById('productPrice').value);
         const stock = parseInt(document.getElementById('productStock').value, 10);
-        const imageUrl = document.getElementById('productImageUrl').value;
-
+        const imageFile = document.getElementById('productImageFile').files[0];
+ 
         if (!name || isNaN(price) || isNaN(stock)) {
             showAlert('Por favor completa nombre, precio y stock.', 'error');
             return;
@@ -509,12 +635,32 @@
 
         try {
             // Intentar insertar en la tabla. Si falla por tabla no encontrada, mostrar instrucciones
+            let imageUrl = null;
+            if (imageFile) {
+                const fileName = `${Date.now()}-${imageFile.name}`;
+                const { error: uploadError } = await supabase.storage
+                    .from('product-images') // Nombre del bucket en Supabase Storage
+                    .upload(fileName, imageFile);
+
+                if (uploadError) {
+                    if (uploadError.message.includes('Bucket not found')) {
+                         showAlert('⚠️ Bucket "product-images" no encontrado en Supabase Storage. Por favor, créalo y configúralo como público.', 'error');
+                         return;
+                    }
+                    throw uploadError;
+                }
+
+                const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(fileName);
+                imageUrl = publicUrl;
+            }
+
+
             const { data, error } = await supabase.from('productos').insert([{
                 nombre: name,
                 precio: price,
                 stock: stock,
-                imagen_url: imageUrl || null
-            }]);
+                imagen_url: imageUrl
+            }]).select();
 
             if (error) {
                 if (error.message.includes('stock')) showAlert('⚠️ La columna "stock" no existe en la tabla "productos". Por favor, créala.', 'error');
@@ -529,7 +675,8 @@
             document.getElementById('productName').value = '';
             document.getElementById('productPrice').value = '';
             document.getElementById('productStock').value = '';
-            document.getElementById('productImageUrl').value = '';
+            document.getElementById('productImageFile').value = '';
+            document.getElementById('addProductPreview').style.display = 'none'; // Ocultar vista previa
             showAlert('Producto agregado exitosamente');
             loadAdminData();
         } catch (error) {
@@ -549,12 +696,14 @@
         document.getElementById('editProductPrice').value = product.precio;
         document.getElementById('editProductStock').value = product.stock;
         document.getElementById('editProductImageUrl').value = product.imagen_url || '';
+        document.getElementById('editProductPreview').src = product.imagen_url || 'https://via.placeholder.com/150';
 
         document.getElementById('editProductModal').style.display = 'flex';
     }
 
     function closeEditProductModal() {
         document.getElementById('editProductModal').style.display = 'none';
+        document.getElementById('editProductImageFile').value = ''; // Limpiar el input de archivo
     }
 
     async function updateProduct() {
@@ -562,7 +711,7 @@
         const name = document.getElementById('editProductName').value;
         const price = parseFloat(document.getElementById('editProductPrice').value);
         const stock = parseInt(document.getElementById('editProductStock').value, 10);
-        const imageUrl = document.getElementById('editProductImageUrl').value;
+        const imageFile = document.getElementById('editProductImageFile').files[0];
 
         if (!name || isNaN(price) || isNaN(stock)) {
             showAlert('Por favor completa nombre, precio y stock.', 'error');
@@ -570,15 +719,50 @@
         }
 
         try {
+            let imageUrl = document.getElementById('editProductImageUrl').value; // URL actual
+
+            // Si se seleccionó un nuevo archivo, borra el anterior (si existe) y sube el nuevo.
+            if (imageFile) {
+                const oldImageUrl = document.getElementById('editProductImageUrl').value;
+                if (oldImageUrl) {
+                    try {
+                        // Extraemos el nombre del archivo de la URL completa.
+                        const oldFileName = oldImageUrl.split('/').pop();
+                        await supabase.storage.from('product-images').remove([oldFileName]);
+                    } catch (deleteError) { //
+                        // Si falla el borrado, no detenemos el proceso, solo lo registramos en la consola.
+                        console.error("No se pudo borrar la imagen anterior, pero se continuará con la actualización:", deleteError.message);
+                    }
+                }
+
+                // Paso 2: Subir la nueva imagen.
+                const fileName = `${Date.now()}-${imageFile.name}`;
+                const { error: uploadError } = await supabase.storage
+                    .from('product-images')
+                    .upload(fileName, imageFile);
+
+                if (uploadError) {
+                    if (uploadError.message.includes('Bucket not found')) {
+                         showAlert('⚠️ Bucket "product-images" no encontrado en Supabase Storage. Por favor, créalo y configúralo como público.', 'error');
+                         return;
+                    }
+                    throw uploadError;
+                }
+
+                const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(fileName);
+                imageUrl = publicUrl;
+            }
+            
             const { error } = await supabase
                 .from('productos')
-                .update({ nombre: name, precio: price, stock: stock, imagen_url: imageUrl || null })
+                .update({ nombre: name, precio: price, stock: stock, imagen_url: imageUrl })
                 .eq('id', id);
 
             if (error) throw error;
 
             showAlert('Producto actualizado correctamente.');
             closeEditProductModal();
+            document.getElementById('editProductImageFile').value = ''; // Limpiar el input de archivo
             loadAdminData(); // Recargar datos para ver los cambios
         } catch (error) {
             showAlert('Error al actualizar el producto: ' + error.message, 'error');
@@ -781,6 +965,20 @@
         }
     }
 
+    function previewImage(input, previewElementId) {
+        const preview = document.getElementById(previewElementId);
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+
     function showEditClientModal(clientId) {
         const client = allClients.find(c => c.id === clientId);
         if (!client) {
@@ -792,9 +990,9 @@
         document.getElementById('editClientName').value = client.nombre;
         document.getElementById('editClientAddress').value = client.direccion;
         document.getElementById('editClientPhone').value = client.telefono;
-        document.getElementById('editClientZone').value = client.zona;
 
         document.getElementById('editClientModal').style.display = 'flex';
+        setTimeout(() => initMapForEditClient(client), 100);
     }
 
     function closeEditClientModal() {
@@ -806,17 +1004,28 @@
         const name = document.getElementById('editClientName').value;
         const address = document.getElementById('editClientAddress').value;
         const phone = document.getElementById('editClientPhone').value;
-        const zone = document.getElementById('editClientZone').value;
+        const lat = parseFloat(document.getElementById('editClientLat').value);
+        const lng = parseFloat(document.getElementById('editClientLng').value);
 
-        if (!name || !address || !zone) {
-            showAlert('Por favor completa nombre, dirección y zona.', 'error');
+        if (!name || !address) {
+            showAlert('Por favor completa nombre y dirección.', 'error');
+            return;
+        }
+        if (isNaN(lat) || isNaN(lng)) {
+            showAlert('Por favor, marca la ubicación en el mapa.', 'error');
             return;
         }
 
         try {
             const { error } = await supabase
                 .from('clientes')
-                .update({ nombre: name, direccion: address, telefono: phone, zona: zone.toUpperCase() })
+                .update({ 
+                    nombre: name, 
+                    direccion: address, 
+                    telefono: phone,
+                    latitud: lat,
+                    longitud: lng
+                })
                 .eq('id', id);
 
             if (error) throw error;
@@ -920,13 +1129,53 @@
             `;
 
             document.getElementById('boletaModal').style.display = 'flex';
+
+            // Inicializar el mapa en la boleta
+            if (order.clientes && order.clientes.latitud && order.clientes.longitud) {
+                setTimeout(() => {
+                    initBoletaMap(order.clientes);
+                }, 100);
+            }
         } catch (error) {
             showAlert(`Error al mostrar la boleta: ${error.message}`, 'error');
         }
     }
 
-    function createRoute() {
-        showAlert('Función de rutas disponible en próxima actualización');
+    async function createVisitRoute() {
+        const preventistaId = document.getElementById('routePreventistaSelect').value;
+        const visitDate = document.getElementById('routeVisitDate').value;
+
+        if (!preventistaId) {
+            showAlert('Por favor, selecciona un preventista.', 'error');
+            return;
+        }
+        if (!visitDate) {
+            showAlert('Por favor, selecciona una fecha para la visita.', 'error');
+            return;
+        }
+        if (selectedClientsForVisit.length === 0) {
+            showAlert('No has seleccionado ningún cliente para visitar.', 'error');
+            return;
+        }
+
+        const visitsToInsert = selectedClientsForVisit.map(clientId => ({
+            preventista_id: preventistaId,
+            cliente_id: clientId,
+            fecha_visita: visitDate
+        }));
+
+        try {
+            const { error } = await supabase.from('visitas').insert(visitsToInsert);
+            if (error) throw error;
+
+            showAlert('Ruta de visitas creada exitosamente.');
+            
+            // Limpiamos la selección y recargamos los datos del admin
+            selectedClientsForVisit = [];
+            loadAdminData(); // O una función más específica si no quieres recargar todo
+        } catch (error) {
+            showAlert('Error al crear la ruta de visitas: ' + error.message, 'error');
+        }
     }
 
     function closeBoletaModal() {
@@ -961,6 +1210,7 @@
             const { data: clientes } = await supabase.from('clientes').select('*');
             allClients = clientes || []; // Guardar en cache para edición y búsqueda
             renderClientsList(allClients);
+            renderClientsForRoute(allClients);
 
             // Cargar y renderizar clientes sin asignar
             const unassignedClients = allClients.filter(c => !c.preventista_id);
@@ -1005,7 +1255,7 @@
             // Actualizar select
             const select = document.getElementById('routePreventistaSelect');
             select.innerHTML = '<option value="">-- Seleccionar --</option>' + 
-                (preventistas || []).map(p => `<option value="${p.id}">${p.nombre} (${p.zona})</option>`).join('');
+                (preventistas || []).map(p => `<option value="${p.user_id}">${p.nombre} (${p.zona})</option>`).join('');
 
             // Crear un mapa de preventistas para buscar nombres fácilmente
             const preventistaMap = (preventistas || []).reduce((map, p) => {
@@ -1100,13 +1350,42 @@
         }
     }
 
+    function toggleClientSelection(clientId) {
+        const clientCard = document.getElementById(`route-client-${clientId}`);
+        const index = selectedClientsForVisit.indexOf(clientId);
+
+        if (index > -1) {
+            // Si ya está seleccionado, quitarlo
+            selectedClientsForVisit.splice(index, 1);
+            clientCard.style.borderColor = '#d1d5db';
+            clientCard.style.background = 'white';
+        } else {
+            // Si no está seleccionado, agregarlo
+            selectedClientsForVisit.push(clientId);
+            clientCard.style.borderColor = '#4f46e5';
+            clientCard.style.background = '#eef2ff';
+        }
+        updateRouteMap();
+        updateSelectedVisitsList();
+    }
+
+    function updateSelectedVisitsList() {
+        const listEl = document.getElementById('selectedVisitsList');
+        if (selectedClientsForVisit.length === 0) {
+            listEl.innerHTML = 'Ninguno';
+        } else {
+            const selectedNames = selectedClientsForVisit.map(id => allClients.find(c => c.id === id)?.nombre || `ID ${id}`);
+            listEl.innerHTML = selectedNames.map(name => `<div style="padding: 0.25rem; background: #eef2ff; border-radius: 0.25rem;">${name}</div>`).join('');
+        }
+    }
+
     function renderClientsList(clients) {
         const clientsList = document.getElementById('clientsList');
         clientsList.innerHTML = (clients || []).map(c => `
             <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: #f9fafb;">
                 <div style="flex-grow: 1;">
                     <p style="font-weight: 600; margin: 0;">${c.nombre}</p>
-                    <p style="color: #6b7280; margin: 0.25rem 0 0 0; font-size: 0.8rem;">${c.direccion}</p>
+                    <p style="color: #6b7280; margin: 0.25rem 0 0 0; font-size: 0.8rem;">${c.direccion} ${c.latitud ? '📍' : ''}</p>
                     <p style="color: #4f46e5; font-weight: bold; margin: 0.25rem 0 0 0;">Zona: ${c.zona}</p>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0;">
@@ -1124,6 +1403,119 @@
             (c.zona && c.zona.toLowerCase().includes(searchTerm))
         );
         renderClientsList(filteredClients);
+    }
+
+    function renderClientsForRoute(clients) {
+        const clientsList = document.getElementById('routeClientsList');
+        clientsList.innerHTML = (clients || []).map(c => `
+            <div id="route-client-${c.id}" onclick="toggleClientSelection(${c.id})" style="padding: 0.75rem; border: 2px solid #d1d5db; border-radius: 0.375rem; background: white; cursor: pointer; transition: all 0.2s;">
+                <p style="font-weight: 600; margin: 0;">${c.nombre}</p>
+                <p style="margin: 0.25rem 0 0 0; color: #6b7280; font-size: 0.8rem;">${c.direccion} ${c.latitud ? '📍' : ''}</p>
+            </div>
+        `).join('') || '<p style="color: #6b7280;">No hay clientes para mostrar.</p>';
+    }
+
+    function filterClientsForRoute() {
+        const searchTerm = document.getElementById('routeClientSearch').value.toLowerCase();
+        const filteredClients = allClients.filter(c => 
+            c.nombre.toLowerCase().includes(searchTerm)
+        );
+        renderClientsForRoute(filteredClients);
+    }
+
+    // ====== FUNCIONES DE REPORTES ======
+    function loadReportsData() {
+        const days = parseInt(document.getElementById('reportDateRange').value, 10);
+        const now = new Date();
+        const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - days);
+
+        const filteredOrders = loadedOrders.filter(o => new Date(o.created_at) >= startDate);
+
+        renderSalesByPreventistaChart(filteredOrders);
+        renderTopProductsChart(filteredOrders);
+    }
+
+    function renderSalesByPreventistaChart(filteredOrders) { // Reemplazada para mostrar una tabla
+        const salesByPreventista = filteredOrders.reduce((acc, order) => {
+            const preventistaName = order.preventistas?.nombre || 'Sin Asignar';
+            acc[preventistaName] = (acc[preventistaName] || 0) + order.total;
+            return acc;
+        }, {});
+
+        // Ordenar los datos de mayor a menor para un mejor ranking visual
+        const sortedSales = Object.entries(salesByPreventista).sort(([,a],[,b]) => b - a);
+
+        const tableContainer = document.getElementById('salesByPreventistaTable');
+        if (sortedSales.length === 0) {
+            tableContainer.innerHTML = '<p style="color: #6b7280;">No hay datos de ventas en este período.</p>';
+            return;
+        }
+
+        const tableHTML = `
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+                ${sortedSales.map(([name, total], index) => `
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="padding: 0.75rem 0.5rem; font-weight: 600;">${index + 1}. ${name}</td>
+                        <td style="padding: 0.75rem 0.5rem; text-align: right; font-weight: bold; color: #16a34a;">$${formatCurrency(total)}</td>
+                    </tr>
+                `).join('')}
+            </table>
+        `;
+        tableContainer.innerHTML = tableHTML;
+    }
+
+    function renderTopProductsChart(filteredOrders) { // Reemplazada para mostrar una tabla
+        const productSales = filteredOrders.flatMap(order => order.items).reduce((acc, item) => {
+            const productName = item.nombre || 'Producto Desconocido';
+            acc[productName] = (acc[productName] || 0) + item.cantidad;
+            return acc;
+        }, {});
+
+        // Ordenar y tomar los 10 productos más vendidos
+        const sortedProducts = Object.entries(productSales)
+            .sort(([,a],[,b]) => b - a)
+            .slice(0, 10); // Top 10
+
+        const tableContainer = document.getElementById('topProductsTable');
+        if (sortedProducts.length === 0) {
+            tableContainer.innerHTML = '<p style="color: #6b7280;">No hay datos de productos vendidos en este período.</p>';
+            return;
+        }
+
+        const tableHTML = `
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+                ${sortedProducts.map(([name, quantity], index) => `
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="padding: 0.75rem 0.5rem; font-weight: 500;">${index + 1}. ${name}</td>
+                        <td style="padding: 0.75rem 0.5rem; text-align: right; font-weight: bold; color: #4f46e5;">${quantity}</td>
+                    </tr>
+                `).join('')}
+            </table>
+        `;
+        tableContainer.innerHTML = tableHTML;
+    }
+
+    function exportReportsToCSV() {
+        const days = parseInt(document.getElementById('reportDateRange').value, 10);
+        const now = new Date();
+        const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - days);
+        const filteredOrders = loadedOrders.filter(o => new Date(o.created_at) >= startDate);
+
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "ID Pedido,Fecha,Cliente,Preventista,Zona,Total\n";
+
+        filteredOrders.forEach(order => {
+            const row = [order.id, new Date(order.created_at).toLocaleDateString('es-AR'), `"${order.clientes?.nombre || 'N/A'}"`, `"${order.preventistas?.nombre || 'N/A'}"`, order.zona, order.total].join(',');
+            csvContent += row + "\n";
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `reporte_ventas_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     function filterProducts() {
@@ -1255,7 +1647,7 @@
         const orderCatalogList = document.getElementById('orderCatalogList');
         orderCatalogList.innerHTML = (products || []).map(p => `
             <div style="border: 1px solid #d1d5db; border-radius: 0.375rem; background: white; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: flex; flex-direction: column;">
-                <img src="${p.imagen_url || 'https://via.placeholder.com/150'}" alt="${p.nombre}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 0.375rem 0.375rem 0 0; background: #e5e7eb;">
+                <img src="${p.imagen_url || 'https://via.placeholder.com/150'}" alt="${p.nombre}" onclick="showImagePreview('${p.imagen_url || 'https://via.placeholder.com/150'}')" style="width: 100%; height: 120px; object-fit: cover; border-radius: 0.375rem 0.375rem 0 0; background: #e5e7eb; cursor: pointer;">
                 <div style="padding: 0.75rem; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
                     <p style="font-weight: 600; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.nombre}</p>
                     <p style="color: #16a34a; font-weight: bold; margin: 0.25rem 0;">$${formatCurrency(p.precio)} <span style="color: #6b7280; font-weight: 500; font-size: 0.75rem;">(Stock: ${p.stock || 0})</span></p>
@@ -1269,14 +1661,38 @@
         `).join('') || '<p style="color: #6b7280;">No se encontraron productos.</p>';
     }
 
+    // Nuevo modal para previsualizar imagen
+    document.body.insertAdjacentHTML('beforeend', `
+        <div id="imagePreviewModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 60;" onclick="closeImagePreviewModal()">
+            <div style="max-width: 90vw; max-height: 90vh; padding: 1rem;">
+                <img id="fullScreenImage" src="" alt="Vista previa del producto" style="max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 0 2rem rgba(0,0,0,0.5);">
+            </div>
+        </div>
+    `);
+
+    function showImagePreview(imageUrl) {
+        document.getElementById('fullScreenImage').src = imageUrl;
+        document.getElementById('imagePreviewModal').style.display = 'flex';
+    }
+
+    function closeImagePreviewModal() {
+        document.getElementById('imagePreviewModal').style.display = 'none';
+    }
+
     // ====== FUNCIONES DE PREVENTISTA ======
     async function createClient() {
         const name = document.getElementById('newClientName').value;
         const address = document.getElementById('newClientAddress').value;
         const phone = document.getElementById('newClientPhone').value;
+        const lat = parseFloat(document.getElementById('newClientLat').value);
+        const lng = parseFloat(document.getElementById('newClientLng').value);
 
         if (!name || !address) {
             showAlert('Por favor completa nombre y dirección', 'error');
+            return;
+        }
+        if (isNaN(lat) || isNaN(lng)) {
+            showAlert('Por favor, marca la ubicación en el mapa.', 'error');
             return;
         }
 
@@ -1285,6 +1701,8 @@
                 nombre: name,
                 direccion: address,
                 telefono: phone || '',
+                latitud: lat,
+                longitud: lng,
                 zona: currentZone,
                 preventista_id: currentUser.id
             }]);
@@ -1294,9 +1712,6 @@
             document.getElementById('newClientName').value = '';
             document.getElementById('newClientAddress').value = '';
             document.getElementById('newClientPhone').value = '';
-            document.getElementById('preventistDni').value = '';
-            document.getElementById('preventistName').value = '';
-            document.getElementById('preventistPhone').value = '';
             
             showAlert('Cliente creado exitosamente');
             loadPreventistaData();
@@ -1350,7 +1765,7 @@
             renderOrderCatalog(catalogProducts);
 
             // Cargar clientes del preventista para el selector de pedidos
-            const { data: misClientes } = await supabase.from('clientes').select('id, nombre').eq('preventista_id', currentUser.id);
+            const { data: misClientes } = await supabase.from('clientes').select('*').eq('preventista_id', currentUser.id);
             const clientSelect = document.getElementById('orderClientSelect');
             clientSelect.innerHTML = '<option value="">-- Seleccionar Cliente --</option>' + 
                 (misClientes || []).map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
@@ -1366,12 +1781,12 @@
 
             const myOrdersList = document.getElementById('myOrdersList');
             myOrdersList.innerHTML = (misPedidos || []).map(o => `
-                <div style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: #f9fafb;">
+                <div onclick='showOrderModal(loadedOrders.find(p => p.id === ${o.id}))' style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: #f9fafb; cursor: pointer;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <p style="font-weight: 600; margin: 0;">Pedido #${o.id} - ${o.clientes.nombre}</p>
+                        <p style="font-weight: 600; margin: 0;">Pedido #${o.id} - ${o.clientes?.nombre || 'N/A'}</p>
                         <p style="font-weight: bold; margin: 0; color: ${o.estado === 'pendiente' ? '#b45309' : '#16a34a'};">${o.estado.toUpperCase()}</p>
                     </div>
-                    <p style="margin: 0.25rem 0 0 0;">Fecha: ${new Date(o.created_at).toLocaleDateString()}</p>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 0.8rem; color: #6b7280;">Fecha: ${new Date(o.created_at).toLocaleDateString()}</p>
                     <p style="margin: 0.25rem 0 0 0; font-weight: 600;">Total: $${formatCurrency(o.total)}</p>
                 </div>
             `).join('') || '<p style="color: #6b7280;">No has realizado pedidos.</p>';
@@ -1379,8 +1794,9 @@
             // Cargar mis clientes
             const myClientsList = document.getElementById('myClientsList');
             myClientsList.innerHTML = (misClientes || []).map(c => `
-                <div style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: #f9fafb;">
-                    <p style="font-weight: 600; margin: 0;">${c.nombre}</p>
+                <div onclick="showClientProfileModal(${c.id})" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: #f9fafb; cursor: pointer;">
+                    <p style="font-weight: 600; margin: 0;">${c.nombre} ${c.latitud ? '📍' : ''}</p>
+                    <p style="font-size: 0.8rem; color: #6b7280; margin: 0.25rem 0 0 0;">${c.direccion}</p>
                 </div>
             `).join('') || '<p style="color: #6b7280;">No tienes clientes asignados.</p>';
 
@@ -1390,6 +1806,53 @@
             if (currentUser) {
                 await handleLogout();
             }
+        }
+    }
+
+    async function loadMyRouteData() {
+        const today = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+        const { data: visits, error } = await supabase
+            .from('visitas')
+            .select('*, clientes(*)')
+            .eq('preventista_id', currentUser.id)
+            .eq('fecha_visita', today);
+
+        if (error) {
+            showAlert('Error al cargar tu ruta de hoy: ' + error.message, 'error');
+            return;
+        }
+
+        const routeListEl = document.getElementById('myRouteList');
+        routeListEl.innerHTML = (visits || []).map(v => `
+            <div style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: ${v.estado === 'visitado' ? '#dcfce7' : 'white'};">
+                <p style="font-weight: 600; margin: 0;">${v.clientes.nombre}</p>
+                <p style="font-size: 0.8rem; color: #6b7280; margin: 0.25rem 0 0.5rem 0;">${v.clientes.direccion}</p>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button onclick="takeOrderForClient(${v.cliente_id})" class="btn-primary" style="width: 100%; font-size: 0.75rem; padding: 0.5rem;">📝 Tomar Pedido</button>
+                    ${v.estado !== 'visitado' ? `<button onclick="markVisitAsDone(${v.id})" class="btn-success" style="width: 100%; font-size: 0.75rem; padding: 0.5rem;">✓ Visita Realizada</button>` : ''}
+                </div>
+            </div>
+        `).join('') || '<p style="color: #6b7280;">No tienes visitas asignadas para hoy.</p>';
+
+        // Actualizar el mapa de la ruta del preventista
+        updateMyRouteMap(visits);
+    }
+
+    function takeOrderForClient(clientId) {
+        switchTab('nuevo-pedido');
+        document.getElementById('orderClientSelect').value = clientId;
+    }
+
+    async function markVisitAsDone(visitId) {
+        const { error } = await supabase
+            .from('visitas')
+            .update({ estado: 'visitado' })
+            .eq('id', visitId);
+
+        if (error) showAlert('Error al marcar la visita: ' + error.message, 'error');
+        else {
+            showAlert('Visita marcada como realizada.');
+            loadMyRouteData(); // Recargar la lista de rutas
         }
     }
 
@@ -1485,10 +1948,180 @@
         updateUI();
     }
 
+    // ====== FUNCIONES DE LEAFLET.JS (MAPAS) ======
+    function initMaps() { // Esta función se llama al final del script
+        initRouteMap();
+    }
+
+    function initMap(mapId, latInputId, lngInputId, initialCoords) {
+        const mapDiv = document.getElementById(mapId);
+        if (!mapDiv || mapDiv._leaflet_id) return null; // Evitar reinicialización
+
+        const map = L.map(mapId).setView([initialCoords.lat, initialCoords.lng], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        const marker = L.marker([initialCoords.lat, initialCoords.lng], {
+            draggable: true,
+            title: "Arrastra para ubicar"
+        }).addTo(map);
+
+        // Actualizar inputs cuando el marcador se mueve
+        marker.on('dragend', (event) => {
+            const pos = event.target.getLatLng();
+            document.getElementById(latInputId).value = pos.lat;
+            document.getElementById(lngInputId).value = pos.lng;
+        });
+
+        // Establecer valor inicial
+        document.getElementById(latInputId).value = initialCoords.lat;
+        document.getElementById(lngInputId).value = initialCoords.lng;
+
+        return { map, marker }; // Devolvemos ambos
+    }
+
+    function initMapForNewClient() {
+        const defaultLocation = { lat: -34.6037, lng: -58.3816 }; // Centro de Buenos Aires
+        const mapInstance = initMap('newClientMap', 'newClientLat', 'newClientLng', defaultLocation);
+        if (mapInstance) {
+            newClientMap = mapInstance.map; // Guardamos el mapa
+            newClientMarker = mapInstance.marker; // Guardamos el marcador
+        }
+    }
+
+    function initMapForEditClient(client) {
+        const clientLocation = (client && client.latitud && client.longitud) 
+            ? { lat: parseFloat(client.latitud), lng: parseFloat(client.longitud) }
+            : { lat: -34.6037, lng: -58.3816 };
+
+        const mapInstance = initMap('editClientMap', 'editClientLat', 'editClientLng', clientLocation);
+        if (mapInstance) {
+            editClientMap = mapInstance.map;
+            editClientMarker = mapInstance.marker;
+        }
+    }
+
+    async function searchAddress(inputId, map, marker) {
+        const address = document.getElementById(inputId).value;
+        if (!address) {
+            showAlert('Por favor, ingresa una dirección para buscar.', 'error');
+            return;
+        }
+
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data && data.length > 0) {
+                const { lat, lon } = data[0];
+                const newPos = [parseFloat(lat), parseFloat(lon)];
+                
+                map.setView(newPos, 16); // Centrar el mapa en la nueva ubicación
+                marker.setLatLng(newPos); // Mover el marcador
+
+                // Disparar el evento 'dragend' para actualizar los inputs
+                marker.fire('dragend');
+
+                showAlert('Ubicación encontrada. Puedes arrastrar el marcador para ajustar.');
+            } else {
+                showAlert('No se encontraron resultados para esa dirección.', 'error');
+            }
+        } catch (error) {
+            showAlert('Error al buscar la dirección: ' + error.message, 'error');
+        }
+    }
+
+    function initRouteMap() {
+        const mapDiv = document.getElementById('routeMap');
+        if (!mapDiv || mapDiv._leaflet_id) return;
+        routeMap = L.map('routeMap').setView([-34.6037, -58.3816], 11);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(routeMap);
+    }
+
+    let routeMarkers = [];
+    function updateRouteMap() {
+        if (!routeMap) return;
+
+        // Limpiar marcadores anteriores de Leaflet
+        routeMarkers.forEach(marker => marker.remove());
+        routeMarkers = [];
+
+        const markerPositions = [];
+        let markersAdded = 0;
+
+        selectedClientsForVisit.forEach(clientId => {
+            const client = allClients.find(c => c.id === clientId);
+            if (client && client.latitud && client.longitud) {
+                const pos = [parseFloat(client.latitud), parseFloat(client.longitud)];
+                const marker = L.marker(pos).addTo(routeMap)
+                    .bindPopup(client.nombre); // Añade un popup con el nombre
+                routeMarkers.push(marker);
+                markerPositions.push(pos);
+                markersAdded++;
+            }
+        });
+
+        if (markersAdded > 0) {
+            const bounds = L.latLngBounds(markerPositions);
+            routeMap.fitBounds(bounds, { padding: [50, 50] }); // Ajusta el mapa con un poco de padding
+        }
+    }
+
+    let myRouteMarkers = [];
+    function updateMyRouteMap(visits) {
+        if (!myRouteMap) {
+            const mapDiv = document.getElementById('myRouteMap');
+            if (!mapDiv || mapDiv._leaflet_id) return;
+            myRouteMap = L.map('myRouteMap').setView([-34.6037, -58.3816], 11);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(myRouteMap);
+        }
+
+        myRouteMarkers.forEach(marker => marker.remove());
+        myRouteMarkers = [];
+
+        const markerPositions = [];
+        let markersAdded = 0;
+
+        (visits || []).forEach(visit => {
+            if (visit.clientes && visit.clientes.latitud && visit.clientes.longitud) {
+                const pos = [parseFloat(visit.clientes.latitud), parseFloat(visit.clientes.longitud)];
+                const marker = L.marker(pos).addTo(myRouteMap).bindPopup(visit.clientes.nombre);
+                myRouteMarkers.push(marker);
+                markerPositions.push(pos);
+                markersAdded++;
+            }
+        });
+
+        if (markersAdded > 0) {
+            const bounds = L.latLngBounds(markerPositions);
+            myRouteMap.fitBounds(bounds, { padding: [50, 50] });
+        }
+    }
+
+    let boletaMap = null;
+    function initBoletaMap(client) {
+        if (boletaMap) boletaMap.remove();
+        const mapDiv = document.getElementById('boletaMap');
+        if (!mapDiv) return;
+
+        const clientLocation = [parseFloat(client.latitud), parseFloat(client.longitud)];
+        boletaMap = L.map(mapDiv).setView(clientLocation, 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(boletaMap);
+        L.marker(clientLocation).addTo(boletaMap);
+        setTimeout(() => boletaMap.invalidateSize(), 200); // Asegura que el mapa se renderice bien en el modal
+    }
+
     // Inicializar
     window.addEventListener('load', () => {
         checkAdminEmail(); // Comprobar por si el navegador autocompleta el email
         initializeApp();
+        initMaps(); // Inicializar los mapas base
     });
 </script>
 

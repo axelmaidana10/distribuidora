@@ -145,7 +145,38 @@
                     <h3 style="font-size: 1.25rem; font-weight: bold; color: #4338ca; margin-bottom: 1rem;">Agregar Producto</h3>
                     <input type="text" id="productName" placeholder="Nombre" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem;">
                     <input type="number" id="productPrice" placeholder="Precio" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem;" step="0.01" min="0">
-                    <input type="number" id="productStock" placeholder="Stock inicial" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem;" min="0">
+                    <input type="number" id="productStock" placeholder="Stock inicial" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;" min="0">
+                    <label class="form-label" for="productCategory">Categoría</label>
+                    <select id="productCategory" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
+                        <option value="">-- Seleccionar Subcategoría --</option>
+                        <optgroup label="Alimentos Secos">
+                            <option value="Pastas">Pastas</option>
+                            <option value="Harinas y Repostería">Harinas y Repostería</option>
+                            <option value="Conservas">Conservas</option>
+                            <option value="Desayuno y Snacks">Desayuno y Snacks</option>
+                        </optgroup>
+                        <optgroup label="Bebidas">
+                            <option value="Bebidas sin Alcohol">Bebidas sin Alcohol</option>
+                            <option value="Bebidas Alcohólicas">Bebidas Alcohólicas</option>
+                        </optgroup>
+                        <optgroup label="Limpieza y Hogar">
+                            <option value="Limpieza de Ropa">Limpieza de Ropa</option>
+                            <option value="Limpieza General">Limpieza General</option>
+                        </optgroup>
+                        <optgroup label="Higiene y Cuidado Personal">
+                            <option value="Cuidado Bucal">Cuidado Bucal</option>
+                            <option value="Cuidado Capilar y Corporal">Cuidado Capilar y Corporal</option>
+                        </optgroup>
+                        <optgroup label="Golosinas y Snacks">
+                            <option value="Galletas">Galletas</option>
+                            <option value="Otros Snacks">Otros Snacks</option>
+                        </optgroup>
+                        <optgroup label="Refrigerados">
+                            <option value="Lácteos">Lácteos</option>
+                            <option value="Fiambrería y Embutidos">Fiambrería y Embutidos</option>
+                        </optgroup>
+                        <option value="Otros">Otros</option>
+                    </select>
                     <label class="form-label" for="productImageFile">Imagen del producto (opcional)</label>
                     <input type="file" id="productImageFile" accept="image/*" onchange="previewImage(this, 'addProductPreview')" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
                     <img id="addProductPreview" src="https://via.placeholder.com/150" alt="Vista previa" style="width: 100px; height: 100px; object-fit: cover; border-radius: 0.375rem; margin-bottom: 0.75rem; display: none;">
@@ -282,8 +313,9 @@
         </div>
 
         <div id="tab-mis-clientes" class="tab-content" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
-            <div class="card">
-                <h3 style="font-size: 1.25rem; font-weight: bold;">Mis Clientes</h3>
+            <div class="card" style="grid-column: 1 / -1;">
+                <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">Mis Clientes</h3>
+                <input type="text" id="myClientSearch" onkeyup="filterMyClients()" placeholder="🔍 Buscar en mis clientes..." style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem;">
                 <div id="myClientsList" style="max-height: 384px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; font-size: 0.875rem;"></div>
             </div>
             <div class="card" style="grid-column: span 2;">
@@ -347,11 +379,12 @@
                 <!-- Columna de Resumen de Pedido -->
                 <div class="card">
                     <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">2. Resumen del Pedido</h3>
+                    <p id="editingOrderIndicator" style="font-size: 0.8rem; font-weight: bold; color: #b45309; background: #fffbeb; padding: 0.5rem; border-radius: 0.375rem; margin-bottom: 1rem; display: none;">✏️ Editando Pedido...</p>
                     <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">Cliente</label>
                     <select id="orderClientSelect" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem; margin-bottom: 1rem;"></select>
                     <div id="orderSummaryList" style="max-height: 220px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 0.375rem; padding: 0.75rem; background: #f9fafb; margin-bottom: 1rem; font-size: 0.875rem;"><p style="color: #6b7280;">Agrega productos del catálogo.</p></div>
                     <p style="font-size: 1.125rem; font-weight: bold; text-align: right; margin-bottom: 1rem;">Total: <span id="orderTotal">$0.00</span></p>
-                    <button onclick="submitOrder()" class="btn-success" style="width: 100%; font-size: 0.875rem;">✓ Finalizar Pedido</button>
+                    <button id="submitOrderBtn" onclick="submitOrder()" class="btn-success" style="width: 100%; font-size: 0.875rem;">✓ Finalizar Pedido</button>
                 </div>
             </div>
         </div>
@@ -368,7 +401,10 @@
                 <p id="clientProfileAddress" style="margin: 0 0 0.5rem 0;"></p>
                 <p id="clientProfilePhone" style="margin: 0 0 1rem 0;"></p>
                 <div id="clientProfileMap" style="width: 100%; height: 200px; border-radius: 0.5rem; background: #e5e7eb; margin-bottom: 1rem; z-index: 1;"></div>
-                <h4 style="font-weight: bold; margin-bottom: 0.5rem;">Historial de Pedidos</h4>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <h4 style="font-weight: bold; margin: 0;">Historial de Pedidos</h4>
+                    <button id="clientProfileNewOrderBtn" class="btn-primary" style="font-size: 0.75rem; padding: 0.5rem 0.75rem;">📝 Iniciar Pedido</button>
+                </div>
                 <div id="clientProfileOrders" style="max-height: 150px; overflow-y: auto;"></div>
             </div>
         </div>
@@ -402,6 +438,37 @@
             <input type="number" id="editProductPrice" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;" step="0.01" min="0">
             <label class="form-label" for="editProductStock">Stock</label>
             <input type="number" id="editProductStock" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;" min="0">
+            <label class="form-label" for="editProductCategory">Categoría</label>
+            <select id="editProductCategory" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
+                <option value="">-- Seleccionar Subcategoría --</option>
+                <optgroup label="Alimentos Secos">
+                    <option value="Pastas">Pastas</option>
+                    <option value="Harinas y Repostería">Harinas y Repostería</option>
+                    <option value="Conservas">Conservas</option>
+                    <option value="Desayuno y Snacks">Desayuno y Snacks</option>
+                </optgroup>
+                <optgroup label="Bebidas">
+                    <option value="Bebidas sin Alcohol">Bebidas sin Alcohol</option>
+                    <option value="Bebidas Alcohólicas">Bebidas Alcohólicas</option>
+                </optgroup>
+                <optgroup label="Limpieza y Hogar">
+                    <option value="Limpieza de Ropa">Limpieza de Ropa</option>
+                    <option value="Limpieza General">Limpieza General</option>
+                </optgroup>
+                <optgroup label="Higiene y Cuidado Personal">
+                    <option value="Cuidado Bucal">Cuidado Bucal</option>
+                    <option value="Cuidado Capilar y Corporal">Cuidado Capilar y Corporal</option>
+                </optgroup>
+                <optgroup label="Golosinas y Snacks">
+                    <option value="Galletas">Galletas</option>
+                    <option value="Otros Snacks">Otros Snacks</option>
+                </optgroup>
+                <optgroup label="Refrigerados">
+                    <option value="Lácteos">Lácteos</option>
+                    <option value="Fiambrería y Embutidos">Fiambrería y Embutidos</option>
+                </optgroup>
+                <option value="Otros">Otros</option>
+            </select>
             <label class="form-label" for="editProductImageFile">Cambiar Imagen (opcional)</label>
             <input type="file" id="editProductImageFile" accept="image/*" onchange="previewImage(this, 'editProductPreview')" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem;">
             <input type="hidden" id="editProductImageUrl"> <!-- Mantenemos este campo oculto para la URL actual -->
@@ -489,6 +556,7 @@
     let catalogProducts = []; // Cache de productos
     let preventistaProfile = null; // Cache del perfil del preventista
     let currentOrder = {}; // { producto_id: cantidad }
+    let editingOrderId = null; // ID del pedido que se está editando
     let loadedOrders = []; // Cache para los pedidos cargados por el admin
     let allPreventistas = []; // Cache de preventistas para edición
     let allClients = []; // Cache de clientes para edición y búsqueda
@@ -626,9 +694,10 @@
         const price = parseFloat(document.getElementById('productPrice').value);
         const stock = parseInt(document.getElementById('productStock').value, 10);
         const imageFile = document.getElementById('productImageFile').files[0];
+        const category = document.getElementById('productCategory').value;
  
-        if (!name || isNaN(price) || isNaN(stock)) {
-            showAlert('Por favor completa nombre, precio y stock.', 'error');
+        if (!name || isNaN(price) || isNaN(stock) || !category) {
+            showAlert('Por favor completa nombre, precio, stock y categoría.', 'error');
             return;
         }
 
@@ -658,7 +727,8 @@
                 nombre: name,
                 precio: price,
                 stock: stock,
-                imagen_url: imageUrl
+                imagen_url: imageUrl,
+                categoria: category
             }]).select();
 
             if (error) {
@@ -674,6 +744,7 @@
             document.getElementById('productName').value = '';
             document.getElementById('productPrice').value = '';
             document.getElementById('productStock').value = '';
+            document.getElementById('productCategory').value = '';
             document.getElementById('productImageFile').value = '';
             document.getElementById('addProductPreview').style.display = 'none'; // Ocultar vista previa
             showAlert('Producto agregado exitosamente');
@@ -694,6 +765,7 @@
         document.getElementById('editProductName').value = product.nombre;
         document.getElementById('editProductPrice').value = product.precio;
         document.getElementById('editProductStock').value = product.stock;
+        document.getElementById('editProductCategory').value = product.categoria || '';
         document.getElementById('editProductImageUrl').value = product.imagen_url || '';
         document.getElementById('editProductPreview').src = product.imagen_url || 'https://via.placeholder.com/150';
 
@@ -711,9 +783,10 @@
         const price = parseFloat(document.getElementById('editProductPrice').value);
         const stock = parseInt(document.getElementById('editProductStock').value, 10);
         const imageFile = document.getElementById('editProductImageFile').files[0];
+        const category = document.getElementById('editProductCategory').value;
 
-        if (!name || isNaN(price) || isNaN(stock)) {
-            showAlert('Por favor completa nombre, precio y stock.', 'error');
+        if (!name || isNaN(price) || isNaN(stock) || !category) {
+            showAlert('Por favor completa nombre, precio, stock y categoría.', 'error');
             return;
         }
 
@@ -754,7 +827,7 @@
             
             const { error } = await supabase
                 .from('productos')
-                .update({ nombre: name, precio: price, stock: stock, imagen_url: imageUrl })
+                .update({ nombre: name, precio: price, stock: stock, imagen_url: imageUrl, categoria: category })
                 .eq('id', id);
 
             if (error) throw error;
@@ -1137,7 +1210,6 @@
                 </div>
 
                 <!-- Contenedor para el mapa -->
-                <div id="boletaMapContainer" style="margin-top: 1.5rem; ${order.clientes && order.clientes.latitud ? '' : 'display: none;'}">
                 <div id="boletaMapContainer" class="no-print" style="margin-top: 1.5rem; ${order.clientes && order.clientes.latitud ? '' : 'display: none;'}">
                     <h4 style="font-weight: 600; margin: 0 0 0.5rem 0;">Ubicación del Cliente</h4>
                     <div id="boletaMap" style="width: 100%; height: 250px; border-radius: 0.5rem; background: #e5e7eb;"></div>
@@ -1224,6 +1296,7 @@
                     <div style="flex-grow: 1;">
                         <p style="font-weight: 600; margin: 0;">${p.nombre}</p>
                         <p style="color: #16a34a; font-weight: bold; margin: 0.25rem 0 0 0;">$${formatCurrency(p.precio)}</p>
+                        <p style="font-size: 0.75rem; color: #6b7280; margin: 0.25rem 0 0 0;">Categoría: ${p.categoria || 'Sin categoría'}</p>
                     </div>
                     <div>
                         <p style="font-size: 0.75rem; color: #6b7280; margin: 0; text-align: right;">Stock</p>
@@ -1309,14 +1382,22 @@
 
             const ordersList = document.getElementById('ordersList');
             ordersList.innerHTML = loadedOrders.map(o => {
+                const statusColor = o.estado === 'entregado' ? '#16a34a' : '#b45309';
+                const bgColor = o.estado === 'entregado' ? '#f0fdf4' : '#f9fafb';
                 return `
-                    <div style="padding: 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: #f9fafb; display: grid; grid-template-columns: 4fr 1fr; gap: 1rem; align-items: center;">
+                    <div style="padding: 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: ${bgColor}; display: grid; grid-template-columns: 3fr 1fr; gap: 1rem; align-items: center;">
                         <div>
-                            <p style="font-weight: 600; margin: 0;">Pedido #${o.id} - <span style="color: #4338ca;">${o.clientes?.nombre || 'Cliente no encontrado'}</span></p>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                <p style="font-weight: 600; margin: 0;">Pedido #${o.id} - <span style="color: #4338ca;">${o.clientes?.nombre || 'Cliente no encontrado'}</span></p>
+                                <p style="font-weight: bold; margin: 0; color: ${statusColor}; font-size: 0.8rem;">${o.estado.toUpperCase()}</p>
+                            </div>
                             <p style="margin: 0.25rem 0 0 0; color: #6b7280;">Preventista: ${o.preventistas.nombre} | Zona: ${o.zona}</p>
                             <p style="margin: 0.25rem 0 0 0; font-weight: 600;">Total: $${formatCurrency(o.total)}</p>
                         </div>
-                        <button onclick='showOrderModal(loadedOrders.find(p => p.id === ${o.id}))' class="btn-primary" style="padding: 0.5rem; font-size: 0.75rem;">📄 Ver Boleta</button>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <button onclick='showOrderModal(loadedOrders.find(p => p.id === ${o.id}))' class="btn-primary" style="padding: 0.5rem; font-size: 0.75rem;">📄 Ver Boleta</button>
+                            ${o.estado === 'pendiente' ? `<button onclick="updateOrderStatus(${o.id}, 'entregado')" class="btn-success" style="padding: 0.5rem; font-size: 0.75rem;">Marcar como Entregado</button>` : ''}
+                        </div>
                     </div>
                 `;
             }).join('') || '<p style="color: #6b7280;">Sin pedidos</p>';
@@ -1377,6 +1458,20 @@
             `;
         } catch (error) {
             showAlert('Error cargando datos del admin: ' + error.message, 'error');
+        }
+    }
+
+    async function updateOrderStatus(orderId, newStatus) {
+        if (!confirm(`¿Estás seguro de que quieres cambiar el estado de este pedido a "${newStatus}"?`)) {
+            return;
+        }
+        try {
+            const { error } = await supabase.from('pedidos').update({ estado: newStatus }).eq('id', orderId);
+            if (error) throw error;
+            showAlert('Estado del pedido actualizado correctamente.');
+            loadAdminData(); // Recargar los datos para reflejar el cambio
+        } catch (error) {
+            showAlert('Error al actualizar el estado del pedido: ' + error.message, 'error');
         }
     }
 
@@ -1565,6 +1660,14 @@
         } else {
             delete currentOrder[productId];
         }
+        // Actualizar visualmente el input
+        const qtyInput = document.getElementById(`qty-${productId}`);
+        const productCard = qtyInput ? qtyInput.closest('.product-card') : null;
+        if (productCard) {
+            productCard.style.borderColor = quantity > 0 ? '#4f46e5' : '#d1d5db';
+        }
+        if (qtyInput) qtyInput.value = quantity;
+
         updateOrderSummary();
     }
 
@@ -1601,6 +1704,10 @@
     }
 
     function resetOrderForm() {
+        editingOrderId = null;
+        document.getElementById('editingOrderIndicator').style.display = 'none';
+        document.getElementById('submitOrderBtn').textContent = '✓ Finalizar Pedido';
+        document.getElementById('submitOrderBtn').classList.replace('btn-primary', 'btn-success');
         currentOrder = {};
         updateOrderSummary();
         document.getElementById('productSearch').value = '';
@@ -1611,6 +1718,7 @@
     }
 
     async function submitOrder() {
+        const submitBtn = document.getElementById('submitOrderBtn');
         const clienteId = document.getElementById('orderClientSelect').value;
         const items = Object.entries(currentOrder).map(([productId, quantity]) => {
             const product = catalogProducts.find(p => p.id == productId);
@@ -1644,51 +1752,127 @@
 
         const total = items.reduce((sum, item) => sum + item.cantidad * item.precio, 0);
 
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Guardando...';
+
         try {
-            const { data, error } = await supabase.from('pedidos').insert([{
-                preventista_id: currentUser.id,
-                cliente_id: clienteId,
-                total: total,
-                items: items, // Guardamos los productos como JSON
-                estado: 'pendiente',
-                zona: currentZone // Añadir la zona del preventista
-            }]).select();
+            if (editingOrderId) {
+                // --- LÓGICA DE ACTUALIZACIÓN ---
+                const { data: originalOrder, error: fetchError } = await supabase
+                    .from('pedidos')
+                    .select('items')
+                    .eq('id', editingOrderId)
+                    .single();
 
-            if (error) throw error;
+                if (fetchError) throw fetchError;
 
-            // Descontar stock
-            for (const item of items) {
-                const product = catalogProducts.find(p => p.id === item.producto_id);
-                const newStock = product.stock - item.cantidad;
-                await supabase.from('productos').update({ stock: newStock }).eq('id', item.producto_id);
+                // Calcular diferencias de stock
+                const stockAdjustments = new Map();
+                const originalItemsMap = new Map(originalOrder.items.map(item => [item.producto_id, item.cantidad]));
+                const newItemsMap = new Map(items.map(item => [item.producto_id, item.cantidad]));
+
+                // Productos que estaban y siguen estando (o se quitaron)
+                originalItemsMap.forEach((originalQty, productId) => {
+                    const newQty = newItemsMap.get(productId) || 0;
+                    const difference = originalQty - newQty; // Positivo si se devolvió stock, negativo si se quitó más
+                    if (difference !== 0) stockAdjustments.set(productId, difference);
+                });
+
+                // Productos nuevos que no estaban en el pedido original
+                newItemsMap.forEach((newQty, productId) => {
+                    if (!originalItemsMap.has(productId)) {
+                        stockAdjustments.set(productId, -newQty); // Se quita stock
+                    }
+                });
+
+                // Aplicar ajustes de stock
+                for (const [productId, adjustment] of stockAdjustments.entries()) {
+                    await supabase.rpc('ajustar_stock', { producto_id_in: productId, cantidad_ajuste: adjustment });
+                }
+
+                // Actualizar el pedido
+                const { error: updateError } = await supabase.from('pedidos').update({
+                    total: total,
+                    items: items
+                }).eq('id', editingOrderId);
+
+                if (updateError) throw updateError;
+
+                showAlert(`Pedido #${editingOrderId} actualizado exitosamente.`);
+
+            } else {
+                // --- LÓGICA DE CREACIÓN (EXISTENTE) ---
+                const { data, error } = await supabase.from('pedidos').insert([{
+                    preventista_id: currentUser.id,
+                    cliente_id: clienteId,
+                    total: total,
+                    items: items,
+                    estado: 'pendiente',
+                    zona: currentZone
+                }]).select();
+
+                if (error) throw error;
+
+                // Descontar stock para el nuevo pedido
+                for (const item of items) {
+                    await supabase.rpc('ajustar_stock', { producto_id_in: item.producto_id, cantidad_ajuste: -item.cantidad });
+                }
+
+                showAlert(`Pedido #${data[0].id} creado exitosamente.`);
             }
 
-            showAlert(`Pedido #${data[0].id} creado exitosamente.`);
             resetOrderForm();
-            loadPreventistaData(); // Recargar datos para ver el nuevo pedido en "Mis Pedidos"
+            loadPreventistaData();
             switchTab('mis-pedidos');
 
         } catch (error) {
-            showAlert('Error al crear el pedido: ' + error.message, 'error');
+            showAlert(`Error al guardar el pedido: ${error.message}`, 'error');
+        } finally {
+            submitBtn.disabled = false;
         }
+
     }
 
     function renderOrderCatalog(products) {
         const orderCatalogList = document.getElementById('orderCatalogList');
-        orderCatalogList.innerHTML = (products || []).map(p => `
-            <div style="border: 1px solid #d1d5db; border-radius: 0.375rem; background: white; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: flex; flex-direction: column;">
-                <img src="${p.imagen_url || 'https://via.placeholder.com/150'}" alt="${p.nombre}" onclick="showImagePreview('${p.imagen_url || 'https://via.placeholder.com/150'}')" style="width: 100%; height: 120px; object-fit: cover; border-radius: 0.375rem 0.375rem 0 0; background: #e5e7eb; cursor: pointer;">
-                <div style="padding: 0.75rem; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
-                    <p style="font-weight: 600; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.nombre}</p>
-                    <p style="color: #16a34a; font-weight: bold; margin: 0.25rem 0;">$${formatCurrency(p.precio)} <span style="color: #6b7280; font-weight: 500; font-size: 0.75rem;">(Stock: ${p.stock || 0})</span></p>
+
+        // Agrupar productos por categoría
+        const groupedProducts = (products || []).reduce((acc, product) => {
+            const category = product.categoria || 'Otros';
+            if (!acc[category]) {
+                acc[category] = [];
+            }
+            acc[category].push(product);
+            return acc;
+        }, {});
+
+        let catalogHTML = '';
+        const sortedCategories = Object.keys(groupedProducts).sort();
+
+        if (sortedCategories.length === 0) {
+            orderCatalogList.innerHTML = '<p style="color: #6b7280;">No se encontraron productos.</p>';
+            return;
+        }
+
+        for (const category of sortedCategories) {
+            catalogHTML += `<h4 style="font-size: 1.125rem; font-weight: bold; color: #4338ca; margin-bottom: 1rem; grid-column: 1 / -1; border-bottom: 2px solid #eef2ff; padding-bottom: 0.5rem;">${category}</h4>`;
+            catalogHTML += groupedProducts[category].map(p => `
+                <div class="product-card" style="border: 2px solid ${currentOrder[p.id] > 0 ? '#4f46e5' : '#d1d5db'}; border-radius: 0.375rem; background: white; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: flex; flex-direction: column; transition: border-color 0.2s;">
+                    <img src="${p.imagen_url || 'https://via.placeholder.com/150'}" alt="${p.nombre}" onclick="showImagePreview('${p.imagen_url || 'https://via.placeholder.com/150'}')" style="width: 100%; height: 120px; object-fit: cover; border-radius: 0.375rem 0.375rem 0 0; background: #e5e7eb; cursor: pointer;">
+                    <div style="padding: 0.75rem; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                        <p style="font-weight: 600; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.nombre}</p>
+                        <p style="color: #16a34a; font-weight: bold; margin: 0.25rem 0;">$${formatCurrency(p.precio)} <span style="color: #6b7280; font-weight: 500; font-size: 0.75rem;">(Stock: ${p.stock || 0})</span></p>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 0.75rem 0.75rem; margin-top: 0.5rem;">
+                        <button onclick="updateOrder(${p.id}, (parseInt(document.getElementById('qty-${p.id}').value) || 0) - 1)" style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; width: 32px; height: 32px; border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">-</button>
+                        <input type="number" id="qty-${p.id}" min="0" value="${currentOrder[p.id] || 0}" onchange="updateOrder(${p.id}, this.value)" onfocus="this.select()"
+                               style="width: 50px; text-align: center; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-weight: bold; -moz-appearance: textfield;">
+                        <button onclick="updateOrder(${p.id}, (parseInt(document.getElementById('qty-${p.id}').value) || 0) + 1)" style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; width: 32px; height: 32px; border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">+</button>
+                    </div>
                 </div>
-                <div style="display: flex; align-items: center; margin-top: 0.5rem; padding: 0 0.75rem 0.75rem;">
-                    <label for="qty-${p.id}" style="font-size: 0.75rem; margin-right: 0.5rem;">Cant:</label>
-                    <input type="number" id="qty-${p.id}" min="0" value="${currentOrder[p.id] || 0}" onchange="updateOrder(${p.id}, this.value)" 
-                           style="width: 100%; padding: 0.25rem 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;">
-                </div>
-            </div>
-        `).join('') || '<p style="color: #6b7280;">No se encontraron productos.</p>';
+            `).join('');
+        }
+        orderCatalogList.innerHTML = catalogHTML;
     }
 
     // Nuevo modal para previsualizar imagen
@@ -1751,6 +1935,7 @@
     }
 
     async function loadPreventistaData() {
+        let allMyClients = []; // Cache para los clientes del preventista
         try {
             // Cargar perfil del preventista
             const { data: profile, error: profileError } = await supabase
@@ -1781,21 +1966,40 @@
 
             // Renderizar catálogo completo en su pestaña
             const catalogoList = document.getElementById('catalogoList');
-            catalogoList.innerHTML = catalogProducts.map(p => `
-                <div style="border: 1px solid #d1d5db; border-radius: 0.375rem; background: white; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                    <img src="${p.imagen_url || 'https://via.placeholder.com/150'}" alt="${p.nombre}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 0.375rem 0.375rem 0 0; background: #e5e7eb;">
-                    <div style="padding: 0.75rem;">
-                        <p style="font-weight: 600; margin: 0;">${p.nombre}</p>
-                        <p style="color: #16a34a; font-weight: bold; margin: 0.25rem 0 0 0;">$${formatCurrency(p.precio)}</p>
-                    </div>
-                </div>
-            `).join('') || '<p style="color: #6b7280;">Sin productos</p>';
+            const groupedProducts = (catalogProducts || []).reduce((acc, product) => {
+                const category = product.categoria || 'Otros';
+                if (!acc[category]) acc[category] = [];
+                acc[category].push(product);
+                return acc;
+            }, {});
+
+            let catalogoHTML = '';
+            const sortedCategories = Object.keys(groupedProducts).sort();
+
+            if (sortedCategories.length > 0) {
+                for (const category of sortedCategories) {
+                    catalogoHTML += `<h4 style="font-size: 1.125rem; font-weight: bold; color: #4338ca; margin-bottom: 1rem; grid-column: 1 / -1; border-bottom: 2px solid #eef2ff; padding-bottom: 0.5rem;">${category}</h4>`;
+                    catalogoHTML += groupedProducts[category].map(p => `
+                        <div style="border: 1px solid #d1d5db; border-radius: 0.375rem; background: white; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                            <img src="${p.imagen_url || 'https://via.placeholder.com/150'}" alt="${p.nombre}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 0.375rem 0.375rem 0 0; background: #e5e7eb;">
+                            <div style="padding: 0.75rem;">
+                                <p style="font-weight: 600; margin: 0;">${p.nombre}</p>
+                                <p style="color: #16a34a; font-weight: bold; margin: 0.25rem 0 0 0;">$${formatCurrency(p.precio)}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } else {
+                catalogoHTML = '<p style="color: #6b7280;">Sin productos</p>';
+            }
+            catalogoList.innerHTML = catalogoHTML;
 
             // Renderizar catálogo para la toma de pedidos
             renderOrderCatalog(catalogProducts);
 
             // Cargar clientes del preventista para el selector de pedidos
             const { data: misClientes } = await supabase.from('clientes').select('*').eq('preventista_id', currentUser.id);
+            allMyClients = misClientes || [];
             const clientSelect = document.getElementById('orderClientSelect');
             clientSelect.innerHTML = '<option value="">-- Seleccionar Cliente --</option>' + 
                 (misClientes || []).map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
@@ -1803,32 +2007,35 @@
             // Cargar mis pedidos
             const { data: misPedidos, error: pedidosError } = await supabase
                 .from('pedidos')
-                .select('id, created_at, total, estado, clientes ( nombre )')
+                .select('*, clientes(*)') // Pedimos todos los datos del pedido y del cliente
                 .eq('preventista_id', currentUser.id)
                 .order('created_at', { ascending: false });
 
             if (pedidosError) throw pedidosError;
 
+            // Guardamos los pedidos completos en la variable global para que estén disponibles para ver/editar
+            loadedOrders = misPedidos || [];
+
             const myOrdersList = document.getElementById('myOrdersList');
             myOrdersList.innerHTML = (misPedidos || []).map(o => `
-                <div onclick='showOrderModal(loadedOrders.find(p => p.id === ${o.id}))' style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: #f9fafb; cursor: pointer;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <p style="font-weight: 600; margin: 0;">Pedido #${o.id} - ${o.clientes?.nombre || 'N/A'}</p>
-                        <p style="font-weight: bold; margin: 0; color: ${o.estado === 'pendiente' ? '#b45309' : '#16a34a'};">${o.estado.toUpperCase()}</p>
+                <div style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: #f9fafb; display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+                    <div style="flex-grow: 1;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <p style="font-weight: 600; margin: 0;">Pedido #${o.id} - ${o.clientes?.nombre || 'N/A'}</p>
+                            <p style="font-weight: bold; margin: 0; color: ${o.estado === 'entregado' ? '#16a34a' : '#b45309'}; font-size: 0.8rem; white-space: nowrap;">${o.estado.toUpperCase()}</p>
+                        </div>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 0.8rem; color: #6b7280;">Fecha: ${new Date(o.created_at).toLocaleDateString()}</p>
+                        <p style="margin: 0.25rem 0 0 0; font-weight: 600;">Total: $${formatCurrency(o.total)}</p>
                     </div>
-                    <p style="margin: 0.25rem 0 0 0; font-size: 0.8rem; color: #6b7280;">Fecha: ${new Date(o.created_at).toLocaleDateString()}</p>
-                    <p style="margin: 0.25rem 0 0 0; font-weight: 600;">Total: $${formatCurrency(o.total)}</p>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0;">
+                        <button onclick="editOrder(${o.id})" class="btn-primary" style="font-size: 0.75rem; padding: 0.5rem 0.75rem;" ${o.estado === 'entregado' ? 'disabled title="No se puede editar un pedido entregado"' : ''}>✏️ Editar</button>
+                        <button onclick='showOrderModal(loadedOrders.find(p => p.id === ${o.id}))' class="btn-primary" style="background: #6b7280; font-size: 0.75rem; padding: 0.5rem 0.75rem;">📄 Ver</button>
+                    </div>
                 </div>
             `).join('') || '<p style="color: #6b7280;">No has realizado pedidos.</p>';
 
             // Cargar mis clientes
-            const myClientsList = document.getElementById('myClientsList');
-            myClientsList.innerHTML = (misClientes || []).map(c => `
-                <div onclick="showClientProfileModal(${c.id})" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: #f9fafb; cursor: pointer;">
-                    <p style="font-weight: 600; margin: 0;">${c.nombre} ${c.latitud ? '📍' : ''}</p>
-                    <p style="font-size: 0.8rem; color: #6b7280; margin: 0.25rem 0 0 0;">${c.direccion}</p>
-                </div>
-            `).join('') || '<p style="color: #6b7280;">No tienes clientes asignados.</p>';
+            renderMyClients(allMyClients, misPedidos);
 
         } catch (error) {
             showAlert(`Error cargando tus datos: ${error.message}`, 'error');
@@ -1837,6 +2044,82 @@
                 await handleLogout();
             }
         }
+
+        // Hacemos que la función de filtrado sea accesible globalmente
+        window.filterMyClients = () => {
+            const searchTerm = document.getElementById('myClientSearch').value.toLowerCase();
+            const { data: misPedidos } = supabase.from('pedidos').select('cliente_id, created_at').eq('preventista_id', currentUser.id);
+            const filtered = allMyClients.filter(c => c.nombre.toLowerCase().includes(searchTerm));
+            renderMyClients(filtered, misPedidos || []);
+        };
+    }
+
+    async function editOrder(orderId) {
+        const orderToEdit = loadedOrders.find(o => o.id === orderId);
+        if (!orderToEdit) {
+            showAlert('No se pudo encontrar el pedido para editar.', 'error');
+            return;
+        }
+
+        // Cambiar a la pestaña de nuevo pedido
+        switchTab('nuevo-pedido');
+
+        // Marcar que estamos en modo edición
+        editingOrderId = orderId;
+        document.getElementById('editingOrderIndicator').style.display = 'block';
+        document.getElementById('editingOrderIndicator').textContent = `✏️ Editando Pedido #${orderId}`;
+        document.getElementById('submitOrderBtn').textContent = '✓ Actualizar Pedido';
+        document.getElementById('submitOrderBtn').classList.replace('btn-success', 'btn-primary');
+
+        // Seleccionar el cliente
+        document.getElementById('orderClientSelect').value = orderToEdit.cliente_id;
+
+        // Cargar los productos y cantidades en el estado `currentOrder`
+        currentOrder = orderToEdit.items.reduce((acc, item) => {
+            acc[item.producto_id] = item.cantidad;
+            return acc;
+        }, {});
+
+        // Actualizar la UI para que refleje el pedido cargado
+        updateOrderSummary();
+        renderOrderCatalog(catalogProducts);
+    }
+
+    function renderMyClients(clients, orders) {
+        const myClientsList = document.getElementById('myClientsList');
+
+        // Crear un mapa para encontrar el último pedido de cada cliente rápidamente
+        const lastOrdersMap = new Map();
+        (orders || []).forEach(order => {
+            const existing = lastOrdersMap.get(order.cliente_id);
+            if (!existing || new Date(order.created_at) > new Date(existing)) {
+                lastOrdersMap.set(order.cliente_id, order.created_at);
+            }
+        });
+
+        myClientsList.innerHTML = (clients || []).map(c => {
+            const lastOrderDate = lastOrdersMap.get(c.id);
+            const lastOrderDisplay = lastOrderDate 
+                ? `Último pedido: ${new Date(lastOrderDate).toLocaleDateString('es-AR')}`
+                : 'Sin pedidos recientes';
+
+            return `
+            <div style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: #f9fafb; display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+                <div style="flex-grow: 1;">
+                    <p style="font-weight: 600; margin: 0;">${c.nombre} ${c.latitud ? '📍' : ''}</p>
+                    <p style="font-size: 0.8rem; color: #6b7280; margin: 0.25rem 0 0 0;">${c.direccion}</p>
+                    <p style="font-size: 0.75rem; font-style: italic; color: #4338ca; margin: 0.5rem 0 0 0;">${lastOrderDisplay}</p>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0;">
+                    <button onclick="takeOrderForClient(${c.id})" class="btn-primary" style="font-size: 0.75rem; padding: 0.5rem 0.75rem;">📝 Iniciar Pedido</button>
+                    <button onclick="showClientProfileModal(${c.id})" class="btn-primary" style="background: #6b7280; font-size: 0.75rem; padding: 0.5rem 0.75rem;">👤 Ver Perfil</button>
+                </div>
+            </div>
+        `}).join('') || '<p style="color: #6b7280;">No tienes clientes asignados.</p>';
+    }
+
+    function filterMyClients() {
+        if (window.filterMyClients) window.filterMyClients();
     }
 
     async function loadMyRouteData() {
@@ -1871,6 +2154,7 @@
     function takeOrderForClient(clientId) {
         switchTab('nuevo-pedido');
         document.getElementById('orderClientSelect').value = clientId;
+        showAlert(`Cliente seleccionado. Ya puedes agregar productos al pedido.`);
     }
 
     async function markVisitAsDone(visitId) {
@@ -2154,6 +2438,5 @@
         initMaps(); // Inicializar los mapas base
     });
 </script>
-
 </body>
 </html>

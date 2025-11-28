@@ -51,26 +51,25 @@
     </style>
     <style>
         @media print {
-            /* Ocultar todo el cuerpo por defecto */
-            body > * {
-                display: none !important;
+            /* Ocultar todo excepto el contenido de la boleta */
+            body * {
+                visibility: hidden;
             }
-            /* Hacer visible solo el modal de la boleta y su contenido */
-            #boletaModal, #boletaModal * {
-                display: block !important;
+            #boletaContent, #boletaContent * {
+                visibility: visible;
             }
-            /* Ajustar el modal para que ocupe toda la página de impresión */
-            #boletaModal {
+            #boletaContent {
                 position: absolute;
                 left: 0;
                 top: 0;
                 width: 100%;
-                height: auto;
-                background: white;
-                box-shadow: none;
             }
             .no-print {
                 display: none !important;
+            }
+            /* Forzar a los elementos flex y grid dentro de la boleta a ser block para imprimir */
+            #boletaContent [style*="display: flex"], #boletaContent [style*="display: grid"] {
+                display: block !important;
             }
         }
     </style>
@@ -386,7 +385,7 @@
                 <!-- El contenido de la boleta se inyectará aquí -->
             </div>
             <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;" class="no-print">
-                <button onclick="window.print()" class="btn-success" style="width: 100%;">Imprimir</button>
+                <button onclick="printBoleta()" class="btn-success" style="width: 100%;">Imprimir</button>
                 <button onclick="closeBoletaModal()" class="btn-primary" style="width: 100%; background: #6b7280;">Cerrar</button>
             </div>
         </div>
@@ -1089,49 +1088,68 @@
                 return;
             }
             const boletaContent = document.getElementById('boletaContent');
-            
+
             const itemsHtml = order.items.map(item => `
-                <tr style="border-bottom: 1px solid #f3f4f6;">
-                    <td style="padding: 0.5rem 0.25rem; text-align: center;">${item.cantidad}</td>
-                    <td style="padding: 0.5rem 0.25rem;">${item.nombre}</td>
-                    <td style="padding: 0.5rem 0.25rem; text-align: right;">$${formatCurrency(item.precio)}</td>
-                    <td style="padding: 0.5rem 0.25rem; text-align: right; font-weight: 500;">$${formatCurrency(item.cantidad * item.precio)}</td>
+                <tr style="border-bottom: 1px solid #e5e7eb;">
+                    <td style="padding: 0.75rem; text-align: center;">${item.cantidad}</td>
+                    <td style="padding: 0.75rem;">${item.nombre}</td>
+                    <td style="padding: 0.75rem; text-align: right;">$${formatCurrency(item.precio)}</td>
+                    <td style="padding: 0.75rem; text-align: right; font-weight: 600;">$${formatCurrency(item.cantidad * item.precio)}</td>
                 </tr>
             `).join('');
 
             boletaContent.innerHTML = `
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <h3 style="font-size: 1.25rem; font-weight: bold; color: #1e1b4b; margin: 0;">DISTRIBUIDORA URBANS</h3>
+                    <p style="color: #6b7280; margin: 0.25rem 0 0 0;">Comprobante de Pedido</p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px dashed #d1d5db;">
                     <div>
-                        <p style="font-weight: 600;">Cliente:</p>
-                        <p>${order.clientes?.nombre || 'Cliente no especificado'}</p>
-                        <p style="color: #6b7280;">${order.clientes?.direccion || 'Sin dirección'}</p>
+                        <p style="font-weight: 600; margin: 0 0 0.25rem 0;">Facturar a:</p>
+                        <p style="margin: 0; font-weight: 500;">${order.clientes?.nombre || 'Cliente no especificado'}</p>
+                        <p style="color: #6b7280; margin: 0.25rem 0 0 0; font-size: 0.8rem;">${order.clientes?.direccion || 'Sin dirección'}</p>
                     </div>
                     <div style="text-align: right;">
-                        <p style="font-weight: 600;">Pedido N°: ${order.id}</p>
-                        <p>Fecha: ${new Date(order.created_at).toLocaleDateString('es-AR')}</p>
-                        <p>Preventista: ${order.preventistas?.nombre || 'N/A'}</p>
+                        <p style="margin: 0 0 0.25rem 0;"><strong>Pedido N°:</strong> ${order.id}</p>
+                        <p style="margin: 0 0 0.25rem 0;"><strong>Fecha:</strong> ${new Date(order.created_at).toLocaleDateString('es-AR')}</p>
+                        <p style="margin: 0;"><strong>Preventista:</strong> ${order.preventistas?.nombre || 'N/A'}</p>
                     </div>
                 </div>
+
                 <table style="width: 100%; border-collapse: collapse;">
-                    <thead style="background: #f3f4f6; text-align: left;">
+                    <thead style="text-align: left; color: #374151;">
                         <tr>
-                            <th style="padding: 0.5rem 0.25rem; width: 15%; text-align: center;">Cant.</th>
-                            <th style="padding: 0.5rem 0.25rem;">Descripción</th>
-                            <th style="padding: 0.5rem 0.25rem; width: 25%; text-align: right;">P. Unit.</th>
-                            <th style="padding: 0.5rem 0.25rem; width: 25%; text-align: right;">Subtotal</th>
+                            <th style="padding: 0 0.75rem 0.75rem 0.75rem; width: 15%; text-align: center; font-weight: 600;">Cant.</th>
+                            <th style="padding: 0 0.75rem 0.75rem 0.75rem; font-weight: 600;">Descripción</th>
+                            <th style="padding: 0 0.75rem 0.75rem 0.75rem; width: 25%; text-align: right; font-weight: 600;">P. Unit.</th>
+                            <th style="padding: 0 0.75rem 0.75rem 0.75rem; width: 25%; text-align: right; font-weight: 600;">Subtotal</th>
                         </tr>
                     </thead>
                     <tbody>${itemsHtml}</tbody>
                 </table>
-                <div style="text-align: right; margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #e5e7eb;">
-                    <p style="font-size: 1.25rem; font-weight: bold;">Total: $${formatCurrency(order.total)}</p>
+
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #1e1b4b;">
+                    <div style="display: flex; justify-content: flex-end; align-items: center;">
+                        <span style="font-size: 1.125rem; font-weight: 600; color: #374151; margin-right: 1rem;">TOTAL:</span>
+                        <span style="font-size: 1.5rem; font-weight: bold; color: #16a34a;">$${formatCurrency(order.total)}</span>
+                    </div>
+                </div>
+
+                <!-- Contenedor para el mapa -->
+                <div id="boletaMapContainer" style="margin-top: 1.5rem; ${order.clientes && order.clientes.latitud ? '' : 'display: none;'}">
+                <div id="boletaMapContainer" class="no-print" style="margin-top: 1.5rem; ${order.clientes && order.clientes.latitud ? '' : 'display: none;'}">
+                    <h4 style="font-weight: 600; margin: 0 0 0.5rem 0;">Ubicación del Cliente</h4>
+                    <div id="boletaMap" style="width: 100%; height: 250px; border-radius: 0.5rem; background: #e5e7eb;"></div>
                 </div>
             `;
 
             document.getElementById('boletaModal').style.display = 'flex';
 
             // Inicializar el mapa en la boleta
-            if (order.clientes && order.clientes.latitud && order.clientes.longitud) {
+            const boletaMapDiv = document.getElementById('boletaMap');
+            if (order.clientes && order.clientes.latitud && order.clientes.longitud && boletaMapDiv) {
+                boletaMapDiv.innerHTML = ''; // Limpiar mapa anterior
                 setTimeout(() => {
                     initBoletaMap(order.clientes);
                 }, 100);
@@ -1139,6 +1157,22 @@
         } catch (error) {
             showAlert(`Error al mostrar la boleta: ${error.message}`, 'error');
         }
+    }
+
+    async function printBoleta() {
+        if (boletaMap) {
+            // Forzar al mapa a redibujarse para que los tiles se carguen en la impresión
+            await boletaMap.invalidateSize();
+            // Esperar un momento para que las imágenes del mapa se carguen antes de imprimir
+            setTimeout(() => {
+                window.print();
+            }, 500);
+        } else { window.print(); }
+        window.print();
+    }
+
+    function closeBoletaModal() {
+        document.getElementById('boletaModal').style.display = 'none';
     }
 
     async function createVisitRoute() {
@@ -1176,10 +1210,6 @@
         } catch (error) {
             showAlert('Error al crear la ruta de visitas: ' + error.message, 'error');
         }
-    }
-
-    function closeBoletaModal() {
-        document.getElementById('boletaModal').style.display = 'none';
     }
 
     async function loadAdminData() {
@@ -2111,7 +2141,7 @@
         if (!mapDiv) return;
 
         const clientLocation = [parseFloat(client.latitud), parseFloat(client.longitud)];
-        boletaMap = L.map(mapDiv).setView(clientLocation, 16);
+        boletaMap = L.map(mapDiv, { preferCanvas: true }).setView(clientLocation, 16);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(boletaMap);
         L.marker(clientLocation).addTo(boletaMap);
         setTimeout(() => boletaMap.invalidateSize(), 200); // Asegura que el mapa se renderice bien en el modal
